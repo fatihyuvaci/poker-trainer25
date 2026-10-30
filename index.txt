@@ -1,0 +1,2432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b1120">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>25bb GTO Trainer</title>
+<style>
+  :root {
+    --bg-dark: #0b1120;
+    --panel-bg: #1e293b;
+    --panel-border: #334155;
+    --felt-green: #14532d;
+    --felt-inner: #166534;
+    --color-allin: #f28b82;
+    --color-raise: #e61919;
+    --color-call: #18181b;
+    --color-fold: #8c9095;
+    --color-unused: #ffffff;
+    --accent-gold: #fbbf24;
+    --accent-blue: #38bdf8;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    overflow-x: hidden;
+  }
+
+  @media (min-width: 981px) {
+    body {
+      height: 100vh;
+      padding: 10px 16px;
+      overflow: hidden;
+    }
+  }
+
+  /* TOP BAR: TITLE + DRILL MODE + SCORE */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--panel-bg);
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--panel-border);
+    margin-bottom: 6px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .brand h1 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    color: #fff;
+  }
+
+  .brand-tag {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent-blue);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .controls-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .mode-select {
+    background: var(--bg-dark);
+    color: #fff;
+    border: 1px solid #475569;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .stats-pill {
+    background: var(--bg-dark);
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid var(--panel-border);
+    display: flex;
+    gap: 8px;
+  }
+
+  .reset-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid #475569;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    cursor: pointer;
+  }
+
+  /* NAVIGATION BAR (DESKTOP INLINE / MOBILE 2-ROW) */
+  .command-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--panel-bg);
+    padding: 7px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--panel-border);
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  .nav-section {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  .nav-label {
+    font-size: 0.66rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    margin-right: 2px;
+  }
+
+  .divider {
+    width: 1px;
+    height: 22px;
+    background: var(--panel-border);
+  }
+
+  .pos-btn {
+    background: var(--bg-dark);
+    color: var(--text-muted);
+    border: 1px solid var(--panel-border);
+    padding: 6px 10px;
+    border-radius: 7px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.12s;
+    text-align: center;
+  }
+
+  .pos-btn.active {
+    background: var(--accent-gold);
+    color: #0b1120;
+    border-color: var(--accent-gold);
+  }
+
+  .spot-tabs {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  .spot-btn {
+    background: var(--bg-dark);
+    color: #cbd5e1;
+    border: 1px solid var(--panel-border);
+    padding: 6px 10px;
+    border-radius: 7px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+
+  .spot-btn.active {
+    background: rgba(251, 191, 36, 0.14);
+    color: var(--accent-gold);
+    border-color: var(--accent-gold);
+  }
+
+  /* MOBILE NAVIGATION ADAPTATION */
+  @media (max-width: 768px) {
+    .command-bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+      padding: 6px;
+    }
+    .nav-label, .divider {
+      display: none;
+    }
+    .nav-section {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      width: 100%;
+    }
+    .pos-btn {
+      padding: 7px 2px;
+      font-size: 0.72rem;
+    }
+    .spot-tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .spot-tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .spot-btn {
+      flex-shrink: 0;
+    }
+  }
+
+  /* MAIN WORKSPACE GRID */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.12fr;
+    gap: 10px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  @media (max-width: 980px) {
+    .main-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* LEFT PANEL: POKER TABLE */
+  .table-panel {
+    background: var(--panel-bg);
+    border-radius: 12px;
+    padding: 10px;
+    border: 1px solid var(--panel-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 0;
+  }
+
+  .scenario-badges {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr 1.4fr;
+    gap: 6px;
+  }
+
+  .badge-card {
+    background: var(--bg-dark);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 6px;
+    text-align: center;
+  }
+
+  .badge-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+  }
+
+  .badge-value {
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: var(--accent-gold);
+  }
+
+  .badge-value.stack-highlight {
+    color: var(--accent-blue);
+  }
+
+  .poker-felt {
+    background: radial-gradient(circle, var(--felt-inner) 0%, var(--felt-green) 75%, #064e3b 100%);
+    border: 6px solid #3f2e21;
+    box-shadow: inset 0 0 25px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.35);
+    border-radius: 95px;
+    flex: 1;
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .action-history-banner {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 5px 12px;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #f8fafc;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    text-align: center;
+  }
+
+  .hero-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .cards-container {
+    display: flex;
+    gap: 10px;
+  }
+
+  .playing-card {
+    width: 74px;
+    height: 102px;
+    background: #ffffff;
+    border-radius: 9px;
+    box-shadow: 0 5px 14px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 6px;
+    border: 2px solid #e2e8f0;
+  }
+
+  .playing-card .corner-rank {
+    font-size: 1.25rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .playing-card .center-suit {
+    font-size: 2.1rem;
+    align-self: center;
+    line-height: 1;
+  }
+
+  .playing-card .bottom-rank {
+    font-size: 0.95rem;
+    font-weight: 800;
+    align-self: flex-end;
+    line-height: 1;
+  }
+
+  .suit-spades { color: #0f172a; }
+  .suit-hearts { color: #dc2626; }
+  .suit-diamonds { color: #2563eb; }
+  .suit-clubs { color: #15803d; }
+
+  .hand-notation-badge {
+    background: var(--bg-dark);
+    color: #fff;
+    padding: 2px 14px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    border: 2px solid var(--accent-gold);
+  }
+
+  /* FEEDBACK BOX */
+  .feedback-box {
+    min-height: 58px;
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-dark);
+    border: 1px solid var(--panel-border);
+    gap: 8px;
+  }
+
+  .feedback-box.correct {
+    background: rgba(21, 128, 61, 0.28);
+    border-color: #22c55e;
+  }
+
+  .feedback-box.wrong {
+    background: rgba(185, 28, 28, 0.28);
+    border-color: #ef4444;
+  }
+
+  .feedback-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .feedback-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+
+  .icon-neutral { background: #1e293b; color: #64748b; }
+  .icon-correct { background: #22c55e; color: #052e16; }
+  .icon-wrong { background: #ef4444; color: #fff; }
+
+  .feedback-text h3 {
+    font-size: 0.84rem;
+    font-weight: 800;
+  }
+
+  .feedback-text p {
+    font-size: 0.72rem;
+    color: #cbd5e1;
+    margin-top: 2px;
+  }
+
+  .next-btn {
+    background: var(--accent-gold);
+    color: #0f172a;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 900;
+    font-size: 0.78rem;
+    cursor: pointer;
+    display: none;
+    white-space: nowrap;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+  }
+
+  /* ACTION BUTTONS */
+  .action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
+    gap: 8px;
+  }
+
+  .act-btn {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 6px;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+
+  .act-btn:active { transform: translateY(2px); }
+  .act-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn-fold { background: #64748b; border-bottom: 4px solid #475569; }
+  .btn-call { background: #18181b; border-bottom: 4px solid #09090b; border-top: 1px solid #3f3f46; }
+  .btn-raise { background: #e61919; border-bottom: 4px solid #991b1b; }
+  .btn-allin { background: #f28b82; color: #0f172a; border-bottom: 4px solid #e11d48; }
+
+  .act-btn .act-title {
+    font-size: 0.88rem;
+    font-weight: 900;
+  }
+
+  .act-btn .act-sub {
+    font-size: 0.65rem;
+    opacity: 0.85;
+    font-weight: 600;
+  }
+
+  /* RIGHT PANEL: 13x13 MATRIX */
+  .chart-panel {
+    background: var(--panel-bg);
+    border-radius: 12px;
+    padding: 10px;
+    border: 1px solid var(--panel-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 0;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .chart-title {
+    font-size: 0.84rem;
+    font-weight: 800;
+  }
+
+  .legend {
+    display: flex;
+    gap: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .legend-swatch {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .matrix-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    border: 2px solid var(--bg-dark);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  @media (min-width: 981px) {
+    .matrix-wrapper {
+      max-height: calc(100vh - 235px);
+    }
+  }
+
+  .matrix-grid {
+    display: grid;
+    grid-template-columns: repeat(13, 1fr);
+    grid-template-rows: repeat(13, 1fr);
+    width: 100%;
+    height: 100%;
+    background: #475569;
+    gap: 1px;
+  }
+
+  .matrix-cell {
+    position: relative;
+    background: var(--color-fold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(0.48rem, 2.2vw, 0.74rem);
+    font-weight: 700;
+    color: #f8fafc;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.95);
+    overflow: hidden;
+  }
+
+  .matrix-cell.unused-cell {
+    background: #ffffff;
+    color: transparent;
+    text-shadow: none;
+  }
+
+  .cell-bars {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .bar-allin { background: var(--color-allin); height: 100%; }
+  .bar-raise { background: var(--color-raise); height: 100%; }
+  .bar-call  { background: var(--color-call); height: 100%; }
+  .bar-fold  { background: var(--color-fold); height: 100%; }
+
+  .matrix-cell span {
+    position: relative;
+    z-index: 2;
+  }
+
+  .matrix-cell.active-hand {
+    outline: 3px solid var(--accent-gold);
+    outline-offset: -3px;
+    z-index: 5;
+  }
+
+  .matrix-mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(11, 17, 32, 0.93);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 16px;
+    transition: opacity 0.12s ease;
+    cursor: pointer;
+  }
+
+  .matrix-mask.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .mask-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .mask-sub {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    max-width: 260px;
+  }
+
+  .chart-footer {
+    margin-top: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    gap: 6px;
+  }
+
+  .toggle-peek-btn {
+    background: #334155;
+    color: #e2e8f0;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+  <!-- TOP HEADER BAR -->
+  <header class="top-bar">
+    <div class="brand">
+      <h1>♠️ NLH 25BB GTO TRAINER</h1>
+      <span class="brand-tag" id="totalChartsTag">24 Charts</span>
+    </div>
+    <div class="controls-bar">
+      <select id="drillMode" class="mode-select">
+        <option value="smart">Smart Mix (65% Edge)</option>
+        <option value="borderline">Borderline Only</option>
+        <option value="random">True Random</option>
+      </select>
+      <div class="stats-pill">
+        <span><strong id="scoreText">0/0</strong></span>
+        <span><strong id="accText">0%</strong></span>
+        <span><strong id="streakText">0</strong>🔥</span>
+      </div>
+      <button class="reset-btn" onclick="resetStats()">Reset</button>
+    </div>
+  </header>
+
+  <!-- NAVIGATION BAR (POS -> SPOTS) -->
+  <nav class="command-bar">
+    <div class="nav-section" id="posButtonsContainer"></div>
+    <div class="divider"></div>
+    <div class="spot-tabs" id="spotButtonsContainer"></div>
+  </nav>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="main-grid">
+    <!-- LEFT: TABLE & ACTIONS -->
+    <section class="table-panel">
+      <div class="scenario-badges">
+        <div class="badge-card">
+          <div class="badge-label">Hero Pos</div>
+          <div class="badge-value" id="badgePos">UTG</div>
+        </div>
+        <div class="badge-card">
+          <div class="badge-label">Stack</div>
+          <div class="badge-value stack-highlight" id="badgeStack">25 BB</div>
+        </div>
+        <div class="badge-card">
+          <div class="badge-label">Spot</div>
+          <div class="badge-value" id="badgeSpot">Open Raise</div>
+        </div>
+      </div>
+
+      <div class="poker-felt">
+        <div class="action-history-banner" id="feltBanner">
+          Action on Hero (UTG 25bb) — First to Act
+        </div>
+
+        <div class="hero-area">
+          <div class="cards-container">
+            <div id="card1" class="playing-card suit-spades">
+              <div class="corner-rank">A</div>
+              <div class="center-suit">♠</div>
+              <div class="bottom-rank">A</div>
+            </div>
+            <div id="card2" class="playing-card suit-hearts">
+              <div class="corner-rank">K</div>
+              <div class="center-suit">♥</div>
+              <div class="bottom-rank">K</div>
+            </div>
+          </div>
+          <div id="handNotation" class="hand-notation-badge">AKo</div>
+        </div>
+      </div>
+
+      <div id="feedbackBox" class="feedback-box">
+        <div class="feedback-left">
+          <div id="feedbackIcon" class="feedback-icon icon-neutral">?</div>
+          <div class="feedback-text">
+            <h3 id="feedbackTitle">Your Action</h3>
+            <p id="feedbackDesc">Tap your action below.</p>
+          </div>
+        </div>
+        <button id="nextBtn" class="next-btn" onclick="dealNextHand()">NEXT →</button>
+      </div>
+
+      <div id="actionButtonsContainer" class="action-buttons"></div>
+    </section>
+
+    <!-- RIGHT: 13x13 MATRIX -->
+    <section class="chart-panel">
+      <div class="chart-header">
+        <div class="chart-title" id="chartTitle">Hand Range 137: UTG 25bb</div>
+        <div class="legend" id="chartLegend"></div>
+      </div>
+
+      <div class="matrix-wrapper" id="matrixWrapper">
+        <div id="matrixGrid" class="matrix-grid"></div>
+        <div id="matrixMask" class="matrix-mask">
+          <div class="mask-title">🔒 Chart Hidden</div>
+          <div class="mask-sub">Touch & hold here (or hold [`] key) to peek, or choose your action above.</div>
+        </div>
+      </div>
+
+      <div class="chart-footer">
+        <span>Hold chart or [`] to peek • Tap Next / [Space]</span>
+        <button class="toggle-peek-btn" onclick="togglePeek()">👁️ Peek Chart</button>
+      </div>
+    </section>
+  </main>
+
+<script>
+  const RANKS = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
+  const SUITS = [
+    { symbol: '♠', cls: 'suit-spades' },
+    { symbol: '♥', cls: 'suit-hearts' },
+    { symbol: '♦', cls: 'suit-diamonds' },
+    { symbol: '♣', cls: 'suit-clubs' }
+  ];
+
+  const ALL_169_HANDS = [];
+  for (let r = 0; r < 13; r++) {
+    for (let c = 0; c < 13; c++) {
+      if (r === c) ALL_169_HANDS.push(RANKS[r] + RANKS[c]);
+      else if (r < c) ALL_169_HANDS.push(RANKS[r] + RANKS[c] + 's');
+      else ALL_169_HANDS.push(RANKS[c] + RANKS[r] + 'o');
+    }
+  }
+
+  // ============================================================================
+  // 25BB RANGES — UTG / UTG+1 (Hand Ranges 137, 261, 313, 262)
+  // ============================================================================
+
+  const RANGE_137_25BB_RAW = {
+    'AA': { raise: 100 }, 'KK': { raise: 100 }, 'QQ': { raise: 100 }, 'JJ': { raise: 100 },
+    'TT': { raise: 100 }, '99': { raise: 100 }, '88': { raise: 100 }, '77': { raise: 100 },
+    '66': { raise: 100 },
+    'AKs': { raise: 100 }, 'AQs': { raise: 100 }, 'AJs': { raise: 100 }, 'ATs': { raise: 100 },
+    'A9s': { raise: 100 }, 'A8s': { raise: 100 }, 'A7s': { raise: 100 }, 'A6s': { raise: 100 },
+    'A5s': { raise: 100 }, 'A4s': { raise: 100 },
+    'KQs': { raise: 100 }, 'KJs': { raise: 100 }, 'KTs': { raise: 100 }, 'K9s': { raise: 100 },
+    'K8s': { raise: 85 },  'K7s': { raise: 12 },
+    'QJs': { raise: 100 }, 'QTs': { raise: 100 }, 'Q9s': { raise: 100 },
+    'JTs': { raise: 100 }, 'J9s': { raise: 100 },
+    'T9s': { raise: 100 }, 'T8s': { raise: 100 },
+    '98s': { raise: 85 },  '87s': { raise: 18 },  '76s': { raise: 15 },
+    'AKo': { raise: 100 }, 'AQo': { raise: 100 }, 'AJo': { raise: 100 }, 'ATo': { raise: 100 },
+    'KQo': { raise: 100 }, 'KJo': { raise: 100 }, 'KTo': { raise: 12 }
+  };
+
+  const RANGE_261_25BB_RAW = {
+    'AA':  { raise: 80, call: 20 },
+    'AKs': { raise: 100 },
+    'AQs': { call: 100 },
+    'AJs': { call: 100 },
+    'ATs': { raise: 25, call: 75 },
+    'A9s': { raise: 50, call: 50 },
+    'A5s': { call: 35, fold: 65 },
+    'AKo': { raise: 70, call: 30 },
+    'KK':  { raise: 100 },
+    'KQs': { call: 100 },
+    'KJs': { raise: 70, call: 30 },
+    'KTs': { raise: 75, call: 25 },
+    'AQo': { raise: 80, call: 20 },
+    'KQo': { raise: 30, fold: 70 },
+    'QQ':  { raise: 100 },
+    'QJs': { raise: 50, call: 50 },
+    'QTs': { call: 30, fold: 70 },
+    'AJo': { raise: 30, fold: 70 },
+    'JJ':  { raise: 75, call: 25 },
+    'JTs': { raise: 12, call: 50, fold: 38 },
+    'ATo': { raise: 8, fold: 92 },
+    'TT':  { raise: 45, call: 55 },
+    '99':  { raise: 40, call: 60 },
+    '88':  { raise: 25, call: 50, fold: 25 },
+    '77':  { call: 30, fold: 70 },
+    '66':  { call: 15, fold: 85 }
+  };
+
+  const RANGE_313_25BB_RAW = {
+    'AA':  { call: 100 },
+    'AKs': { allin: 65, call: 35 },
+    'AQs': { call: 100 },
+    'AJs': { call: 100 },
+    'ATs': { call: 100 },
+    'A9s': { allin: 65, call: 35 },
+    'A8s': { call: 100 },
+    'A7s': { call: 50, fold: 50 },
+    'A6s': { call: 35, fold: 65 },
+    'A5s': { allin: 40, call: 60 },
+    'A4s': { allin: 50, call: 50 },
+    'AKo': { allin: 100 },
+    'KK':  { allin: 75, call: 25 },
+    'KQs': { call: 100 },
+    'KJs': { call: 100 },
+    'KTs': { call: 100 },
+    'K9s': { call: 100 },
+    'K8s': { fold: 100 },
+    'K7s': { fold: 100 },
+    'AQo': { allin: 40, call: 60 },
+    'KQo': { call: 30, fold: 70 },
+    'QQ':  { allin: 100 },
+    'QJs': { call: 100 },
+    'QTs': { call: 50, fold: 50 },
+    'Q9s': { fold: 100 },
+    'AJo': { call: 38, fold: 62 },
+    'KJo': { fold: 100 },
+    'JJ':  { call: 100 },
+    'JTs': { fold: 100 },
+    'J9s': { fold: 100 },
+    'ATo': { fold: 100 },
+    'KTo': { fold: 100 },
+    'TT':  { allin: 65, call: 35 },
+    'T9s': { fold: 100 },
+    'T8s': { fold: 100 },
+    '99':  { call: 100 },
+    '98s': { fold: 100 },
+    '88':  { call: 100 },
+    '87s': { fold: 100 },
+    '77':  { fold: 100 },
+    '76s': { call: 100 },
+    '66':  { call: 75, fold: 25 }
+  };
+
+  const RANGE_262_25BB_RAW = {
+    'AA':  { call: 100 },
+    'AKs': { call: 100 },
+    'ATs': { fold: 100 },
+    'A9s': { fold: 100 },
+    'AKo': { call: 100 },
+    'KK':  { call: 100 },
+    'KJs': { fold: 100 },
+    'KTs': { fold: 100 },
+    'AQo': { call: 22, fold: 78 },
+    'KQo': { fold: 100 },
+    'QQ':  { call: 100 },
+    'QJs': { fold: 100 },
+    'AJo': { fold: 100 },
+    'JJ':  { call: 100 },
+    'JTs': { fold: 100 },
+    'ATo': { fold: 100 },
+    'TT':  { call: 100 },
+    '99':  { call: 85, fold: 15 },
+    '88':  { call: 45, fold: 55 }
+  };
+
+  // ============================================================================
+  // 25BB RANGES — LJ / HJ (Hand Ranges 121, 250, 281, 251)
+  // ============================================================================
+
+  const RANGE_121_25BB_RAW = {
+    'AA': { raise: 100 }, 'KK': { raise: 100 }, 'QQ': { raise: 100 }, 'JJ': { raise: 100 },
+    'TT': { raise: 100 }, '99': { raise: 100 }, '88': { raise: 100 }, '77': { raise: 100 },
+    '66': { raise: 100 }, '55': { raise: 100 }, '44': { raise: 65 },
+    'AKs': { raise: 100 }, 'AQs': { raise: 100 }, 'AJs': { raise: 100 }, 'ATs': { raise: 100 },
+    'A9s': { raise: 100 }, 'A8s': { raise: 100 }, 'A7s': { raise: 100 }, 'A6s': { raise: 100 },
+    'A5s': { raise: 100 }, 'A4s': { raise: 100 }, 'A3s': { raise: 100 }, 'A2s': { raise: 100 },
+    'KQs': { raise: 100 }, 'KJs': { raise: 100 }, 'KTs': { raise: 100 }, 'K9s': { raise: 100 },
+    'K8s': { raise: 100 }, 'K7s': { raise: 100 }, 'K6s': { raise: 100 }, 'K5s': { raise: 100 },
+    'K4s': { raise: 85 },
+    'QJs': { raise: 100 }, 'QTs': { raise: 100 }, 'Q9s': { raise: 100 }, 'Q8s': { raise: 100 },
+    'Q7s': { raise: 100 }, 'Q6s': { raise: 100 },
+    'JTs': { raise: 100 }, 'J9s': { raise: 100 }, 'J8s': { raise: 100 }, 'J7s': { raise: 75 },
+    'T9s': { raise: 100 }, 'T8s': { raise: 100 }, 'T7s': { raise: 80 },
+    '98s': { raise: 100 }, '97s': { raise: 100 },
+    '87s': { raise: 100 }, '86s': { raise: 55 },
+    '76s': { raise: 100 },
+    '65s': { raise: 40 },
+    'AKo': { raise: 100 }, 'AQo': { raise: 100 }, 'AJo': { raise: 100 }, 'ATo': { raise: 100 },
+    'A9o': { raise: 100 }, 'A8o': { raise: 100 }, 'A7o': { raise: 70 },  'A5o': { raise: 10 },
+    'KQo': { raise: 100 }, 'KJo': { raise: 100 }, 'KTo': { raise: 100 },
+    'QJo': { raise: 100 }, 'QTo': { raise: 100 },
+    'JTo': { raise: 100 }
+  };
+
+  const RANGE_250_25BB_RAW = {
+    'AA':  { raise: 65, call: 35 },
+    'AKs': { raise: 85, call: 15 },
+    'AQs': { call: 100 },
+    'AJs': { call: 100 },
+    'ATs': { call: 100 },
+    'A9s': { raise: 40, call: 60 },
+    'A8s': { raise: 25, call: 75 },
+    'A5s': { call: 100 },
+    'A4s': { call: 30, fold: 70 },
+    'AKo': { allin: 70, raise: 30 },
+    'KK':  { raise: 100 },
+    'KQs': { allin: 50, call: 50 },
+    'KJs': { call: 100 },
+    'KTs': { raise: 35, call: 65 },
+    'K9s': { raise: 40, call: 60 },
+    'AQo': { raise: 15, call: 85 },
+    'KQo': { raise: 15, call: 85 },
+    'QQ':  { raise: 80, call: 20 },
+    'QJs': { allin: 55, call: 45 },
+    'QTs': { call: 100 },
+    'AJo': { raise: 30, call: 70 },
+    'JJ':  { allin: 25, raise: 65, call: 10 },
+    'JTs': { call: 100 },
+    'ATo': { raise: 55, fold: 45 },
+    'TT':  { allin: 20, raise: 45, call: 35 },
+    'T9s': { raise: 40, call: 60 },
+    '99':  { raise: 20, call: 80 },
+    '88':  { raise: 15, call: 85 },
+    '77':  { call: 100 },
+    '76s': { call: 35, fold: 65 },
+    '66':  { call: 75, fold: 25 },
+    '65s': { call: 12, fold: 88 },
+    '55':  { call: 35, fold: 65 }
+  };
+
+  const RANGE_281_25BB_RAW = {
+    'AA':  { call: 100 }, 'AKs': { call: 100 }, 'AQs': { call: 100 }, 'AJs': { call: 100 }, 'ATs': { call: 100 },
+    'A9s': { fold: 100 }, 'A8s': { fold: 100 }, 'A7s': { fold: 100 }, 'A6s': { fold: 100 }, 'A5s': { fold: 100 },
+    'A4s': { fold: 100 }, 'A3s': { fold: 100 }, 'A2s': { fold: 100 },
+    'AKo': { call: 100 }, 'KK':  { call: 100 }, 'KQs': { fold: 100 }, 'KJs': { call: 100 }, 'KTs': { fold: 100 },
+    'K9s': { fold: 100 }, 'K8s': { fold: 100 }, 'K7s': { fold: 100 }, 'K6s': { fold: 100 }, 'K5s': { fold: 100 },
+    'AQo': { call: 100 }, 'KQo': { fold: 100 }, 'QQ':  { call: 100 }, 'QJs': { call: 30, fold: 70 },
+    'QTs': { fold: 100 }, 'Q9s': { fold: 100 }, 'Q8s': { fold: 100 }, 'Q7s': { fold: 100 },
+    'AJo': { call: 60, fold: 40 }, 'KJo': { fold: 100 }, 'QJo': { fold: 100 }, 'JJ': { call: 100 },
+    'JTs': { call: 60, fold: 40 }, 'J9s': { fold: 100 }, 'J8s': { fold: 100 },
+    'ATo': { fold: 100 }, 'KTo': { fold: 100 }, 'QTo': { fold: 100 }, 'JTo': { fold: 100 },
+    'TT':  { call: 100 }, 'T9s': { fold: 100 }, 'T8s': { fold: 100 },
+    'A9o': { fold: 100 }, '99':  { call: 100 }, '98s': { fold: 100 }, '97s': { fold: 100 },
+    'A8o': { fold: 100 }, '88':  { call: 100 }, '87s': { fold: 100 },
+    '77':  { call: 100 }, '76s': { fold: 100 },
+    '66':  { call: 20, fold: 80 }, '65s': { fold: 100 },
+    '55':  { fold: 100 },
+    '44':  { fold: 100 }
+  };
+
+  const RANGE_251_25BB_RAW = {
+    'AA':  { call: 100 },
+    'AKs': { call: 100 },
+    'A9s': { fold: 100 },
+    'A8s': { fold: 100 },
+    'AKo': { call: 100 },
+    'KK':  { call: 100 },
+    'KTs': { fold: 100 },
+    'K9s': { fold: 100 },
+    'AQo': { call: 100 },
+    'KQo': { fold: 100 },
+    'QQ':  { call: 100 },
+    'AJo': { fold: 100 },
+    'JJ':  { call: 100 },
+    'ATo': { fold: 100 },
+    'TT':  { call: 100 },
+    'T9s': { fold: 100 },
+    '99':  { call: 100 },
+    '88':  { call: 100 }
+  };
+
+  // ============================================================================
+  // 25BB RANGES — BN (Hand Ranges 113, 218, 295, 219)
+  // ============================================================================
+
+  const RANGE_113_25BB_RAW = {
+    'AA': { raise: 100 }, 'KK': { raise: 100 }, 'QQ': { raise: 100 }, 'JJ': { raise: 100 },
+    'TT': { raise: 100 }, '99': { raise: 100 }, '88': { raise: 100 }, '77': { raise: 100 },
+    '66': { raise: 100 }, '55': { raise: 100 }, '44': { raise: 100 }, '33': { raise: 50 },
+    'AKs': { raise: 100 }, 'AQs': { raise: 100 }, 'AJs': { raise: 100 }, 'ATs': { raise: 100 },
+    'A9s': { raise: 100 }, 'A8s': { raise: 100 }, 'A7s': { raise: 100 }, 'A6s': { raise: 100 },
+    'A5s': { raise: 100 }, 'A4s': { raise: 100 }, 'A3s': { raise: 100 }, 'A2s': { raise: 100 },
+    'KQs': { raise: 100 }, 'KJs': { raise: 100 }, 'KTs': { raise: 100 }, 'K9s': { raise: 100 },
+    'K8s': { raise: 100 }, 'K7s': { raise: 100 }, 'K6s': { raise: 100 }, 'K5s': { raise: 100 },
+    'K4s': { raise: 100 }, 'K3s': { raise: 100 }, 'K2s': { raise: 100 },
+    'QJs': { raise: 100 }, 'QTs': { raise: 100 }, 'Q9s': { raise: 100 }, 'Q8s': { raise: 100 },
+    'Q7s': { raise: 100 }, 'Q6s': { raise: 100 }, 'Q5s': { raise: 100 }, 'Q4s': { raise: 100 },
+    'Q3s': { raise: 100 }, 'Q2s': { raise: 20 },
+    'JTs': { raise: 100 }, 'J9s': { raise: 100 }, 'J8s': { raise: 100 }, 'J7s': { raise: 100 },
+    'J6s': { raise: 100 }, 'J5s': { raise: 100 }, 'J4s': { raise: 100 },
+    'T9s': { raise: 100 }, 'T8s': { raise: 100 }, 'T7s': { raise: 100 }, 'T6s': { raise: 100 },
+    'T5s': { raise: 100 },
+    '98s': { raise: 100 }, '97s': { raise: 100 }, '96s': { raise: 100 }, '95s': { raise: 15 },
+    '87s': { raise: 100 }, '86s': { raise: 100 }, '85s': { raise: 100 },
+    '76s': { raise: 100 }, '75s': { raise: 100 },
+    '65s': { raise: 100 },
+    '54s': { raise: 100 },
+    'AKo': { raise: 100 }, 'AQo': { raise: 100 }, 'AJo': { raise: 100 }, 'ATo': { raise: 100 },
+    'A9o': { raise: 100 }, 'A8o': { raise: 100 }, 'A7o': { raise: 100 }, 'A6o': { raise: 100 },
+    'A5o': { raise: 100 }, 'A4o': { raise: 100 }, 'A3o': { raise: 100 }, 'A2o': { raise: 100 },
+    'KQo': { raise: 100 }, 'KJo': { raise: 100 }, 'KTo': { raise: 100 }, 'K9o': { raise: 100 },
+    'K8o': { raise: 100 }, 'K7o': { raise: 100 }, 'K6o': { raise: 12 },
+    'QJo': { raise: 100 }, 'QTo': { raise: 100 }, 'Q9o': { raise: 100 }, 'Q8o': { raise: 100 },
+    'JTo': { raise: 100 }, 'J9o': { raise: 100 }, 'J8o': { raise: 80 },
+    'T9o': { raise: 100 }, 'T8o': { raise: 85 },
+    '98o': { raise: 45 }
+  };
+
+  const RANGE_218_25BB_RAW = {
+    'AA':  { raise: 55, call: 45 },
+    'AKs': { raise: 100 },
+    'AQs': { call: 100 },
+    'AJs': { call: 100 },
+    'ATs': { call: 100 },
+    'A9s': { raise: 30, call: 70 },
+    'A8s': { call: 100 },
+    'A7s': { raise: 30, call: 70 },
+    'A6s': { call: 100 },
+    'A5s': { allin: 50, call: 50 },
+    'A4s': { allin: 12, call: 88 },
+    'A3s': { raise: 20, call: 80 },
+    'A2s': { raise: 35, fold: 65 },
+    'AKo': { allin: 45, raise: 55 },
+    'KK':  { raise: 100 },
+    'KQs': { call: 100 },
+    'KJs': { call: 100 },
+    'KTs': { call: 100 },
+    'K9s': { raise: 30, call: 70 },
+    'K8s': { raise: 30, call: 70 },
+    'AQo': { allin: 15, raise: 15, call: 70 },
+    'KQo': { call: 100 },
+    'QQ':  { raise: 75, call: 25 },
+    'QJs': { allin: 85, call: 15 },
+    'QTs': { call: 100 },
+    'Q9s': { raise: 30, call: 70 },
+    'Q8s': { call: 20, fold: 80 },
+    'AJo': { call: 100 },
+    'KJo': { raise: 30, call: 70 },
+    'QJo': { raise: 18, fold: 82 },
+    'JJ':  { allin: 25, raise: 30, call: 45 },
+    'JTs': { call: 100 },
+    'J9s': { call: 100 },
+    'ATo': { raise: 65, call: 35 },
+    'TT':  { allin: 45, raise: 35, call: 20 },
+    'T9s': { call: 100 },
+    'T8s': { call: 100 },
+    '99':  { raise: 12, call: 88 },
+    '98s': { call: 100 },
+    '88':  { raise: 10, call: 90 },
+    '87s': { call: 100 },
+    '77':  { call: 100 },
+    '76s': { call: 100 },
+    '66':  { call: 100 },
+    '65s': { call: 40, fold: 60 },
+    '55':  { call: 100 },
+    '54s': { raise: 20, call: 45, fold: 35 },
+    '44':  { call: 100 },
+    '33':  { call: 70, fold: 30 },
+    '22':  { call: 65, fold: 35 }
+  };
+
+  const RANGE_295_25BB_RAW = {
+    'AA':  { call: 100 },
+    'AKs': { allin: 100 },
+    'AQs': { allin: 20, call: 80 },
+    'AJs': { call: 100 }, 'ATs': { call: 100 }, 'A9s': { call: 100 }, 'A8s': { call: 100 },
+    'A7s': { call: 100 }, 'A6s': { call: 100 },
+    'A5s': { allin: 100 }, 'A4s': { allin: 100 },
+    'A3s': { allin: 65, call: 35 }, 'A2s': { allin: 100 },
+    'AKo': { allin: 100 },
+    'KK':  { call: 100 },
+    'KQs': { allin: 25, call: 75 },
+    'KJs': { call: 100 }, 'KTs': { call: 100 }, 'K9s': { call: 100 }, 'K8s': { call: 100 },
+    'K7s': { call: 100 }, 'K6s': { call: 100 }, 'K5s': { call: 100 }, 'K4s': { call: 100 },
+    'K3s': { fold: 100 }, 'K2s': { fold: 100 },
+    'AQo': { allin: 100 },
+    'KQo': { call: 100 }, 'QQ':  { call: 100 }, 'QJs': { call: 100 }, 'QTs': { call: 100 },
+    'Q9s': { call: 100 }, 'Q8s': { call: 100 },
+    'Q7s': { fold: 100 }, 'Q6s': { fold: 100 }, 'Q5s': { fold: 100 }, 'Q4s': { fold: 100 },
+    'Q3s': { fold: 100 }, 'Q2s': { fold: 100 },
+    'AJo': { allin: 100 },
+    'KJo': { call: 100 }, 'QJo': { call: 100 }, 'JJ':  { call: 100 }, 'JTs': { call: 100 },
+    'J9s': { call: 100 }, 'J8s': { call: 50, fold: 50 },
+    'J7s': { fold: 100 }, 'J6s': { fold: 100 }, 'J5s': { fold: 100 }, 'J4s': { fold: 100 },
+    'ATo': { allin: 75, call: 25 },
+    'KTo': { call: 75, fold: 25 },
+    'QTo': { call: 60, fold: 40 },
+    'JTo': { fold: 100 },
+    'TT':  { call: 100 }, 'T9s': { call: 100 }, 'T8s': { call: 100 },
+    'T7s': { fold: 100 }, 'T6s': { fold: 100 }, 'T5s': { fold: 100 },
+    'A9o': { allin: 22, call: 78 },
+    'K9o': { fold: 100 }, 'Q9o': { fold: 100 }, 'J9o': { fold: 100 }, 'T9o': { fold: 100 },
+    '99':  { call: 100 }, '98s': { call: 100 },
+    '97s': { fold: 100 }, '96s': { fold: 100 }, '95s': { fold: 100 },
+    'A8o': { allin: 5, call: 95 },
+    'K8o': { fold: 100 }, 'Q8o': { fold: 100 }, 'J8o': { fold: 100 }, 'T8o': { fold: 100 }, '98o': { fold: 100 },
+    '88':  { call: 100 }, '87s': { call: 100 },
+    '86s': { fold: 100 }, '85s': { fold: 100 },
+    'A7o': { call: 75, fold: 25 },
+    'K7o': { fold: 100 },
+    '77':  { call: 100 }, '76s': { call: 100 }, '75s': { fold: 100 },
+    'A6o': { fold: 100 }, 'K6o': { fold: 100 },
+    '66':  { call: 100 }, '65s': { call: 50, fold: 50 },
+    'A5o': { allin: 20, call: 80 },
+    '55':  { call: 100 }, '54s': { fold: 100 },
+    'A4o': { call: 65, fold: 35 },
+    '44':  { allin: 45, call: 55 },
+    'A3o': { fold: 100 },
+    '33':  { allin: 100 },
+    'A2o': { fold: 100 }
+  };
+
+  const RANGE_219_25BB_RAW = {
+    'AA':  { call: 100 },
+    'AKs': { call: 100 },
+    'A9s': { fold: 100 },
+    'A7s': { fold: 100 },
+    'A3s': { fold: 100 },
+    'A2s': { fold: 100 },
+    'AKo': { call: 100 },
+    'KK':  { call: 100 },
+    'K9s': { fold: 100 },
+    'K8s': { fold: 100 },
+    'AQo': { call: 100 },
+    'QQ':  { call: 100 },
+    'Q9s': { fold: 100 },
+    'AJo': { fold: 100 },
+    'KJo': { fold: 100 },
+    'QJo': { fold: 100 },
+    'JJ':  { call: 100 },
+    'ATo': { fold: 100 },
+    'TT':  { call: 100 },
+    '99':  { call: 100 },
+    '88':  { call: 100 },
+    '54s': { fold: 100 }
+  };
+
+  // ============================================================================
+  // 25BB RANGES — SB (Hand Ranges 99, 100, 101, 102, 193, 194)
+  // ============================================================================
+
+  const RANGE_99_25BB_RAW = {
+    'AA':  { raise: 100 }, 'AKs': { raise: 100 }, 'AQs': { raise: 75, call: 25 }, 'AJs': { raise: 75, call: 25 },
+    'ATs': { raise: 100 }, 'A9s': { raise: 80, call: 20 }, 'A8s': { raise: 65, call: 35 }, 'A7s': { raise: 55, call: 45 },
+    'A6s': { raise: 45, call: 55 }, 'A5s': { raise: 35, call: 65 }, 'A4s': { call: 100 }, 'A3s': { call: 100 }, 'A2s': { call: 100 },
+    'AKo': { raise: 60, call: 40 }, 'KK': { raise: 100 }, 'KQs': { raise: 55, call: 45 }, 'KJs': { raise: 50, call: 50 },
+    'KTs': { raise: 35, call: 65 }, 'K9s': { call: 100 }, 'K8s': { call: 100 }, 'K7s': { call: 100 },
+    'K6s': { call: 100 }, 'K5s': { call: 100 }, 'K4s': { call: 100 }, 'K3s': { raise: 15, call: 85 }, 'K2s': { raise: 20, call: 80 },
+    'AQo': { raise: 25, call: 75 }, 'KQo': { raise: 50, call: 50 }, 'QQ': { raise: 100 }, 'QJs': { call: 100 },
+    'QTs': { call: 100 }, 'Q9s': { call: 100 }, 'Q8s': { call: 100 }, 'Q7s': { raise: 10, call: 90 },
+    'Q6s': { call: 100 }, 'Q5s': { raise: 15, call: 85 }, 'Q4s': { raise: 30, call: 70 }, 'Q3s': { raise: 30, call: 70 }, 'Q2s': { raise: 35, call: 65 },
+    'AJo': { raise: 25, call: 75 }, 'KJo': { raise: 40, call: 60 }, 'QJo': { raise: 40, call: 60 }, 'JJ': { raise: 80, call: 20 },
+    'JTs': { raise: 10, call: 90 }, 'J9s': { raise: 5, call: 95 }, 'J8s': { raise: 5, call: 95 }, 'J7s': { raise: 15, call: 85 },
+    'J6s': { raise: 35, call: 65 }, 'J5s': { raise: 45, call: 55 }, 'J4s': { raise: 55, call: 45 }, 'J3s': { raise: 55, call: 45 }, 'J2s': { raise: 55, call: 45 },
+    'ATo': { raise: 30, call: 70 }, 'KTo': { raise: 40, call: 60 }, 'QTo': { raise: 35, call: 65 }, 'JTo': { raise: 30, call: 70 },
+    'TT':  { raise: 100 }, 'T9s': { call: 100 }, 'T8s': { raise: 5, call: 95 }, 'T7s': { raise: 15, call: 85 },
+    'T6s': { raise: 45, call: 55 }, 'T5s': { raise: 55, call: 45 }, 'T4s': { raise: 55, call: 45 }, 'T3s': { raise: 50, call: 50 }, 'T2s': { raise: 50, call: 50 },
+    'A9o': { allin: 20, raise: 20, call: 60 }, 'K9o': { raise: 45, call: 55 }, 'Q9o': { raise: 35, call: 65 },
+    'J9o': { raise: 45, call: 55 }, 'T9o': { raise: 30, call: 70 }, '99': { raise: 60, call: 40 },
+    '98s': { call: 100 }, '97s': { raise: 10, call: 90 }, '96s': { raise: 35, call: 65 }, '95s': { raise: 45, call: 55 },
+    '94s': { raise: 55, call: 45 }, '93s': { raise: 40, call: 60 }, '92s': { raise: 25, call: 75 },
+    'A8o': { allin: 35, raise: 35, call: 30 }, 'K8o': { raise: 45, call: 55 }, 'Q8o': { raise: 45, call: 55 },
+    'J8o': { raise: 50, call: 50 }, 'T8o': { raise: 45, call: 55 }, '98o': { raise: 35, call: 65 },
+    '88':  { raise: 65, call: 35 }, '87s': { raise: 5, call: 95 }, '86s': { raise: 25, call: 75 },
+    '85s': { raise: 40, call: 60 }, '84s': { raise: 45, call: 55 }, '83s': { raise: 10, call: 90 }, '82s': { call: 100 },
+    'A7o': { raise: 50, call: 50 }, 'K7o': { raise: 45, call: 55 }, 'Q7o': { raise: 35, call: 65 },
+    'J7o': { raise: 45, call: 55 }, 'T7o': { raise: 30, call: 70 }, '97o': { raise: 25, call: 75 },
+    '87o': { raise: 20, call: 80 }, '77': { raise: 55, call: 45 }, '76s': { raise: 20, call: 80 },
+    '75s': { raise: 35, call: 65 }, '74s': { raise: 45, call: 55 }, '73s': { raise: 20, call: 80 }, '72s': { call: 100 },
+    'A6o': { raise: 45, call: 55 }, 'K6o': { raise: 40, call: 60 }, 'Q6o': { raise: 35, call: 65 },
+    'J6o': { raise: 5, call: 95 }, 'T6o': { call: 100 }, '96o': { call: 100 }, '86o': { call: 100 },
+    '76o': { raise: 15, call: 85 }, '66': { raise: 20, call: 80 }, '65s': { raise: 30, call: 70 },
+    '64s': { raise: 40, call: 60 }, '63s': { raise: 40, call: 60 }, '62s': { raise: 20, call: 80 },
+    'A5o': { raise: 35, call: 65 }, 'K5o': { raise: 40, call: 60 }, 'Q5o': { raise: 30, call: 70 },
+    'J5o': { raise: 10, call: 90 }, 'T5o': { call: 100 }, '95o': { call: 75, fold: 25 },
+    '85o': { call: 90, fold: 10 }, '75o': { call: 100 }, '65o': { call: 100 }, '55': { call: 100 },
+    '54s': { raise: 35, call: 65 }, '53s': { raise: 40, call: 60 }, '52s': { raise: 45, call: 55 },
+    'A4o': { raise: 35, call: 65 }, 'K4o': { raise: 30, call: 70 }, 'Q4o': { raise: 10, call: 90 },
+    'J4o': { call: 100 }, 'T4o': { call: 65, fold: 35 }, '94o': { fold: 100 }, '84o': { fold: 100 },
+    '74o': { fold: 100 }, '64o': { call: 25, fold: 75 }, '54o': { call: 100 }, '44': { allin: 100 },
+    '43s': { raise: 35, call: 65 }, '42s': { raise: 35, call: 65 },
+    'A3o': { raise: 30, call: 70 }, 'K3o': { raise: 20, call: 80 }, 'Q3o': { call: 100 },
+    'J3o': { call: 100 }, 'T3o': { fold: 100 }, '93o': { fold: 100 }, '83o': { fold: 100 },
+    '73o': { fold: 100 }, '63o': { fold: 100 }, '53o': { call: 10, fold: 90 }, '43o': { fold: 100 },
+    '33':  { allin: 100 }, '32s': { raise: 25, call: 75 },
+    'A2o': { raise: 25, call: 75 }, 'K2o': { raise: 15, call: 85 }, 'Q2o': { call: 100 },
+    'J2o': { call: 85, fold: 15 }, 'T2o': { fold: 100 }, '92o': { fold: 100 }, '82o': { fold: 100 },
+    '72o': { fold: 100 }, '62o': { fold: 100 }, '52o': { fold: 100 }, '42o': { fold: 100 },
+    '32o': { fold: 100 }, '22':  { allin: 100 }
+  };
+
+  const RANGE_100_25BB_RAW = {
+    'AQs': { call: 100 }, 'AJs': { call: 100 }, 'A9s': { call: 100 }, 'A8s': { call: 100 },
+    'A7s': { call: 100 }, 'A6s': { call: 100 }, 'A5s': { call: 100 },
+    'A4s': { fold: 100 }, 'A3s': { fold: 100 }, 'A2s': { fold: 100 },
+    'AKo': { call: 100 }, 'KQs': { call: 100 }, 'KJs': { call: 100 }, 'KTs': { call: 100 },
+    'K9s': { fold: 100 }, 'K8s': { fold: 100 }, 'K7s': { fold: 100 }, 'K6s': { fold: 100 },
+    'K5s': { fold: 100 }, 'K4s': { fold: 100 }, 'K3s': { fold: 100 }, 'K2s': { fold: 100 },
+    'AQo': { call: 100 }, 'KQo': { call: 100 }, 'QJs': { call: 100 }, 'QTs': { call: 100 },
+    'Q9s': { fold: 100 }, 'Q8s': { fold: 100 }, 'Q7s': { fold: 100 }, 'Q6s': { fold: 100 },
+    'Q5s': { fold: 100 }, 'Q4s': { fold: 100 }, 'Q3s': { fold: 100 }, 'Q2s': { fold: 100 },
+    'AJo': { call: 100 }, 'KJo': { call: 100 }, 'QJo': { fold: 100 }, 'JJ': { call: 100 }, 'JTs': { call: 100 },
+    'J9s': { fold: 100 }, 'J8s': { fold: 100 }, 'J7s': { fold: 100 }, 'J6s': { fold: 100 },
+    'J5s': { fold: 100 }, 'J4s': { fold: 100 }, 'J3s': { fold: 100 }, 'J2s': { fold: 100 },
+    'ATo': { call: 100 }, 'KTo': { fold: 100 }, 'QTo': { fold: 100 }, 'JTo': { call: 100 },
+    'T9s': { fold: 100 }, 'T8s': { fold: 100 }, 'T7s': { fold: 100 }, 'T6s': { fold: 100 },
+    'T5s': { fold: 100 }, 'T4s': { fold: 100 }, 'T3s': { fold: 100 }, 'T2s': { fold: 100 },
+    'A9o': { call: 100 }, 'K9o': { fold: 100 }, 'Q9o': { fold: 100 }, 'J9o': { fold: 100 }, 'T9o': { fold: 100 },
+    '99':  { call: 100 }, '98s': { fold: 100 }, '97s': { fold: 100 }, '96s': { fold: 100 },
+    '95s': { fold: 100 }, '94s': { fold: 100 }, '93s': { fold: 100 }, '92s': { fold: 100 },
+    'A8o': { call: 100 }, 'K8o': { fold: 100 }, 'Q8o': { fold: 100 }, 'J8o': { fold: 100 }, 'T8o': { fold: 100 }, '98o': { fold: 100 },
+    '88':  { call: 100 }, '87s': { fold: 100 }, '86s': { fold: 100 }, '85s': { fold: 100 },
+    '84s': { fold: 100 }, '83s': { fold: 100 }, '82s': { fold: 100 },
+    'A7o': { call: 100 }, 'K7o': { fold: 100 }, 'Q7o': { fold: 100 }, 'J7o': { fold: 100 }, 'T7o': { fold: 100 }, '97o': { fold: 100 }, '87o': { fold: 100 },
+    '77':  { call: 100 }, '76s': { fold: 100 }, '75s': { fold: 100 }, '74s': { fold: 100 }, '73s': { fold: 100 }, '72s': { fold: 100 },
+    'A6o': { fold: 100 }, 'K6o': { fold: 100 }, 'Q6o': { fold: 100 }, 'J6o': { fold: 100 }, 'T6o': { fold: 100 }, '96o': { fold: 100 }, '86o': { fold: 100 }, '76o': { fold: 100 },
+    '66':  { call: 100 }, '65s': { fold: 100 }, '64s': { fold: 100 }, '63s': { fold: 100 }, '62s': { fold: 100 },
+    'A5o': { fold: 100 }, 'K5o': { fold: 100 }, 'Q5o': { fold: 100 }, 'J5o': { fold: 100 }, 'T5o': { fold: 100 }, '95o': { fold: 100 }, '85o': { fold: 100 }, '75o': { fold: 100 }, '65o': { fold: 100 },
+    '55':  { call: 100 }, '54s': { fold: 100 }, '53s': { fold: 100 }, '52s': { fold: 100 },
+    'A4o': { fold: 100 }, 'K4o': { fold: 100 }, 'Q4o': { fold: 100 }, 'J4o': { fold: 100 }, 'T4o': { fold: 100 }, '64o': { fold: 100 }, '54o': { fold: 100 },
+    '44':  { call: 100 }, '43s': { fold: 100 }, '42s': { fold: 100 },
+    'A3o': { fold: 100 }, 'K3o': { fold: 100 }, 'Q3o': { fold: 100 }, 'J3o': { fold: 100 }, '53o': { fold: 100 }, '32s': { fold: 100 },
+    'A2o': { fold: 100 }, 'K2o': { fold: 100 }, 'Q2o': { fold: 100 }, 'J2o': { fold: 100 }
+  };
+
+  const RANGE_101_25BB_RAW = {
+    'AQs': { raise: 100 }, 'AJs': { raise: 100 },
+    'A9s': { call: 100 }, 'A8s': { call: 100 }, 'A7s': { call: 100 }, 'A6s': { call: 100 }, 'A5s': { call: 100 },
+    'A4s': { raise: 15, call: 85 }, 'A3s': { raise: 25, call: 75 }, 'A2s': { raise: 40, call: 60 },
+    'AKo': { raise: 100 },
+    'KQs': { call: 100 }, 'KJs': { call: 100 }, 'KTs': { call: 100 }, 'K9s': { call: 100 }, 'K8s': { call: 100 }, 'K7s': { call: 100 },
+    'K6s': { raise: 35, call: 65 }, 'K5s': { raise: 45, call: 55 }, 'K4s': { raise: 25, call: 75 },
+    'K3s': { call: 100 }, 'K2s': { call: 100 },
+    'AQo': { raise: 100 }, 'KQo': { call: 100 },
+    'QJs': { call: 100 }, 'QTs': { call: 100 }, 'Q9s': { call: 100 }, 'Q8s': { call: 100 },
+    'Q7s': { call: 100 }, 'Q6s': { call: 100 }, 'Q5s': { call: 100 }, 'Q4s': { call: 100 },
+    'Q3s': { call: 100 }, 'Q2s': { call: 100 },
+    'AJo': { raise: 100 },
+    'KJo': { call: 100 }, 'QJo': { call: 100 }, 'JJ': { call: 100 }, 'JTs': { call: 100 },
+    'J9s': { call: 100 }, 'J8s': { call: 100 }, 'J7s': { call: 100 }, 'J6s': { call: 100 },
+    'J5s': { call: 100 }, 'J4s': { call: 100 }, 'J3s': { call: 100 }, 'J2s': { call: 100 },
+    'ATo': { raise: 100 },
+    'KTo': { call: 100 }, 'QTo': { call: 100 }, 'JTo': { call: 100 },
+    'T9s': { call: 100 }, 'T8s': { call: 100 }, 'T7s': { call: 100 }, 'T6s': { call: 100 },
+    'T5s': { call: 100 }, 'T4s': { call: 100 }, 'T3s': { call: 100 }, 'T2s': { call: 100 },
+    'A9o': { raise: 85, call: 15 },
+    'K9o': { call: 100 }, 'Q9o': { call: 100 }, 'J9o': { call: 100 }, 'T9o': { call: 100 },
+    '99':  { call: 100 }, '98s': { call: 100 }, '97s': { call: 100 }, '96s': { call: 100 }, '95s': { call: 100 },
+    '94s': { fold: 100 }, '93s': { fold: 100 }, '92s': { fold: 100 },
+    'A8o': { call: 100 }, 'K8o': { call: 100 }, 'Q8o': { call: 100 }, 'J8o': { call: 100 }, 'T8o': { call: 100 }, '98o': { call: 100 },
+    '88':  { raise: 100 }, '87s': { call: 100 }, '86s': { call: 100 }, '85s': { call: 100 },
+    '84s': { call: 45, fold: 55 }, '83s': { fold: 100 }, '82s': { fold: 100 },
+    'A7o': { call: 100 }, 'K7o': { call: 100 }, 'Q7o': { call: 45, fold: 55 },
+    'J7o': { fold: 100 }, 'T7o': { fold: 100 }, '97o': { fold: 100 }, '87o': { fold: 100 },
+    '77':  { raise: 100 }, '76s': { call: 100 }, '75s': { call: 100 }, '74s': { call: 100 },
+    '73s': { fold: 100 }, '72s': { fold: 100 },
+    'A6o': { call: 100 }, 'K6o': { call: 100 },
+    'Q6o': { fold: 100 }, 'J6o': { fold: 100 }, 'T6o': { fold: 100 }, '96o': { fold: 100 }, '86o': { fold: 100 }, '76o': { fold: 100 },
+    '66':  { raise: 100 }, '65s': { call: 100 }, '64s': { call: 100 }, '63s': { call: 50, fold: 50 }, '62s': { fold: 100 },
+    'A5o': { raise: 40, call: 60 }, 'K5o': { call: 85, fold: 15 },
+    'Q5o': { fold: 100 }, 'J5o': { fold: 100 }, 'T5o': { fold: 100 }, '95o': { fold: 100 }, '85o': { fold: 100 }, '75o': { fold: 100 }, '65o': { fold: 100 },
+    '55':  { raise: 100 }, '54s': { call: 100 }, '53s': { call: 100 }, '52s': { call: 75, fold: 25 },
+    'A4o': { raise: 50, call: 50 }, 'K4o': { call: 45, fold: 55 },
+    'Q4o': { fold: 100 }, 'J4o': { fold: 100 }, 'T4o': { fold: 100 }, '64o': { fold: 100 }, '54o': { fold: 100 },
+    '44':  { raise: 100 }, '43s': { call: 100 }, '42s': { call: 25, fold: 75 },
+    'A3o': { raise: 50, call: 50 }, 'K3o': { fold: 100 }, 'Q3o': { fold: 100 }, 'J3o': { fold: 100 }, '53o': { fold: 100 }, '32s': { fold: 100 },
+    'A2o': { raise: 80, call: 20 }, 'K2o': { fold: 100 }, 'Q2o': { fold: 100 }, 'J2o': { fold: 100 }
+  };
+
+  const RANGE_102_25BB_RAW = {
+    'AA':  { call: 100 }, 'AKs': { call: 100 }, 'AQs': { call: 100 }, 'AJs': { call: 100 }, 'ATs': { call: 100 },
+    'A9s': { call: 100 }, 'A8s': { call: 100 }, 'A7s': { call: 100 }, 'A6s': { call: 100 }, 'A5s': { call: 100 },
+    'AKo': { call: 100 }, 'KK': { call: 100 }, 'KQs': { call: 100 }, 'KJs': { call: 100 }, 'KTs': { call: 100 },
+    'K9s': { fold: 100 }, 'K3s': { fold: 100 }, 'K2s': { fold: 100 },
+    'AQo': { call: 100 }, 'KQo': { call: 100 }, 'QQ': { call: 100 },
+    'Q8s': { fold: 100 }, 'Q7s': { fold: 100 }, 'Q6s': { fold: 100 }, 'Q5s': { fold: 100 },
+    'Q4s': { fold: 100 }, 'Q3s': { fold: 100 }, 'Q2s': { fold: 100 },
+    'AJo': { call: 100 }, 'KJo': { call: 100 }, 'QJo': { fold: 100 }, 'JJ': { call: 100 }, 'JTs': { call: 100 },
+    'J9s': { fold: 100 }, 'J8s': { fold: 100 }, 'J7s': { fold: 100 }, 'J6s': { fold: 100 },
+    'J5s': { fold: 100 }, 'J4s': { fold: 100 }, 'J3s': { fold: 100 }, 'J2s': { fold: 100 },
+    'ATo': { call: 100 }, 'KTo': { fold: 100 }, 'QTo': { fold: 100 }, 'JTo': { fold: 100 }, 'TT': { call: 100 },
+    'T8s': { fold: 100 }, 'T7s': { fold: 100 }, 'T6s': { fold: 100 }, 'T5s': { fold: 100 },
+    'T4s': { fold: 100 }, 'T3s': { fold: 100 }, 'T2s': { fold: 100 },
+    'A9o': { call: 100 }, 'K9o': { fold: 100 }, 'Q9o': { fold: 100 }, 'J9o': { fold: 100 }, 'T9o': { fold: 100 },
+    '99':  { call: 100 }, '97s': { fold: 100 }, '96s': { fold: 100 }, '95s': { fold: 100 },
+    '94s': { fold: 100 }, '93s': { fold: 100 }, '92s': { fold: 100 },
+    'A8o': { call: 100 }, 'K8o': { fold: 100 }, 'Q8o': { fold: 100 }, 'J8o': { fold: 100 }, 'T8o': { fold: 100 }, '98o': { fold: 100 },
+    '88':  { call: 100 }, '87s': { fold: 100 }, '86s': { fold: 100 }, '85s': { fold: 100 }, '84s': { fold: 100 }, '83s': { fold: 100 },
+    'A7o': { fold: 100 }, 'K7o': { fold: 100 }, 'Q7o': { fold: 100 }, 'J7o': { fold: 100 }, 'T7o': { fold: 100 }, '97o': { fold: 100 }, '87o': { fold: 100 },
+    '77':  { call: 100 }, '76s': { fold: 100 }, '75s': { fold: 100 }, '74s': { fold: 100 }, '73s': { fold: 100 },
+    'A6o': { fold: 100 }, 'K6o': { fold: 100 }, 'Q6o': { fold: 100 }, 'J6o': { fold: 100 },
+    '96o': { fold: 100 }, '86o': { fold: 100 }, '76o': { fold: 100 }, '66': { call: 100 },
+    '65s': { fold: 100 }, '64s': { fold: 100 }, '63s': { fold: 100 }, '62s': { fold: 100 },
+    'A5o': { fold: 100 }, 'K5o': { fold: 100 }, 'Q5o': { fold: 100 }, 'J5o': { fold: 100 },
+    '54s': { fold: 100 }, '53s': { fold: 100 }, '52s': { fold: 100 },
+    'A4o': { fold: 100 }, 'K4o': { fold: 100 }, 'Q4o': { fold: 100 },
+    '43s': { fold: 100 }, '42s': { fold: 100 },
+    'A3o': { fold: 100 }, 'K3o': { fold: 100 }, '32s': { fold: 100 },
+    'A2o': { fold: 100 }, 'K2o': { fold: 100 }
+  };
+
+  const RANGE_193_25BB_RAW = {
+    'AA':  { raise: 100 }, 'AKs': { raise: 100 }, 'AQs': { raise: 100 },
+    'AJs': { call: 100 }, 'ATs': { call: 100 }, 'A9s': { call: 100 }, 'A8s': { call: 100 },
+    'A7s': { raise: 40, call: 60 }, 'A6s': { call: 100 },
+    'A5s': { raise: 40, call: 60 }, 'A4s': { raise: 45, call: 55 },
+    'A3s': { raise: 25, call: 75 }, 'A2s': { raise: 35, call: 65 },
+    'AKo': { allin: 100 }, 'KK': { raise: 100 }, 'KQs': { call: 100 },
+    'KJs': { allin: 100 }, 'KTs': { allin: 80, call: 20 },
+    'K9s': { raise: 45, call: 55 }, 'K8s': { raise: 30, call: 70 },
+    'K7s': { call: 100 }, 'K6s': { call: 100 }, 'K5s': { call: 60, fold: 40 },
+    'AQo': { allin: 80, raise: 20 }, 'KQo': { raise: 40, call: 60 }, 'QQ': { raise: 100 },
+    'QJs': { allin: 100 }, 'QTs': { call: 100 }, 'Q9s': { call: 100 }, 'Q8s': { call: 100 },
+    'Q6s': { call: 20, fold: 80 },
+    'AJo': { raise: 45, call: 55 }, 'KJo': { raise: 15, call: 85 }, 'QJo': { call: 60, fold: 40 },
+    'JJ':  { allin: 50, raise: 50 }, 'JTs': { call: 100 }, 'J9s': { call: 100 }, 'J8s': { call: 100 },
+    'ATo': { raise: 65, call: 35 }, 'TT': { allin: 75, raise: 25 }, 'T9s': { call: 100 }, 'T8s': { call: 100 },
+    '99':  { allin: 90, raise: 10 }, '98s': { call: 100 }, '97s': { call: 100 },
+    '88':  { call: 100 }, '87s': { call: 100 }, '86s': { call: 35, fold: 65 },
+    '77':  { call: 100 }, '76s': { call: 100 },
+    '66':  { call: 100 }, '65s': { call: 100 },
+    '55':  { raise: 12, call: 88 }, '54s': { call: 100 },
+    '44':  { call: 100 },
+    '33':  { call: 100 },
+    '22':  { call: 100 }
+  };
+
+  const RANGE_194_25BB_RAW = {
+    'AA':  { call: 100 }, 'AKs': { call: 100 }, 'AQs': { call: 100 },
+    'A7s': { fold: 100 }, 'A5s': { fold: 100 }, 'A4s': { fold: 100 }, 'A3s': { fold: 100 }, 'A2s': { fold: 100 },
+    'KK':  { call: 100 }, 'K9s': { fold: 100 }, 'K8s': { fold: 100 },
+    'AQo': { call: 100 }, 'KQo': { fold: 100 }, 'QQ':  { call: 100 },
+    'AJo': { fold: 100 }, 'KJo': { fold: 100 }, 'JJ':  { call: 100 },
+    'ATo': { fold: 100 }, 'TT':  { call: 100 },
+    '98s': { fold: 100 },
+    '55':  { call: 100 }
+  };
+
+  // ============================================================================
+  // 25BB RANGES — BB (Hand Ranges 141, 142, 149, 150, 165, 166)
+  // ============================================================================
+
+  const RANGE_141_25BB_RAW = {
+    'AA':  { call: 100 }, 'AKs': { call: 100 }, 'AQs': { call: 100 }, 'AJs': { call: 100 }, 'ATs': { call: 100 },
+    'A9s': { call: 100 }, 'A8s': { call: 100 }, 'A7s': { call: 100 }, 'A6s': { call: 100 },
+    'AKo': { call: 100 }, 'KK':  { call: 100 }, 'KQs': { call: 100 }, 'KJs': { call: 100 }, 'KTs': { call: 100 },
+    'AQo': { call: 100 }, 'KQo': { call: 100 }, 'QQ':  { call: 100 }, 'QJs': { call: 100 }, 'QTs': { call: 100 },
+    'AJo': { call: 100 }, 'QJo': { call: 100 }, 'JJ':  { call: 100 }, 'JTs': { call: 100 },
+    'ATo': { call: 100 }, 'TT':  { call: 100 },
+    'A9o': { call: 100 }, '99':  { call: 100 },
+    'A8o': { call: 100 }, '88':  { call: 100 },
+    'A7o': { call: 100 }, '77':  { call: 100 },
+    '66':  { call: 100 },
+    '55':  { call: 100 },
+    '44':  { call: 100 },
+    '33':  { call: 100 }
+  };
+
+  const RANGE_142_25BB_RAW = {
+    'AA':  { call: 100 }, 'AKs': { allin: 100 }, 'AQs': { allin: 100 },
+    'AJs': { call: 100 }, 'ATs': { call: 100 }, 'A9s': { call: 100 }, 'A8s': { call: 100 }, 'A7s': { call: 100 },
+    'A6s': { call: 100 }, 'A5s': { call: 100 }, 'A4s': { call: 100 }, 'A3s': { call: 100 }, 'A2s': { call: 100 },
+    'AKo': { allin: 100 }, 'KK': { call: 100 }, 'KQs': { call: 100 }, 'KJs': { call: 100 }, 'KTs': { call: 100 },
+    'K9s': { call: 100 }, 'K8s': { call: 100 }, 'K7s': { call: 100 }, 'K6s': { call: 100 }, 'K5s': { call: 100 },
+    'K4s': { call: 100 }, 'K3s': { call: 100 }, 'K2s': { call: 100 },
+    'AQo': { allin: 100 }, 'KQo': { call: 100 }, 'QQ': { call: 100 }, 'QJs': { call: 100 }, 'QTs': { call: 100 },
+    'Q9s': { call: 100 }, 'Q8s': { call: 100 }, 'Q7s': { call: 100 }, 'Q6s': { call: 100 }, 'Q5s': { call: 100 },
+    'Q4s': { call: 100 }, 'Q3s': { call: 100 }, 'Q2s': { call: 100 },
+    'AJo': { allin: 100 }, 'KJo': { call: 100 }, 'QJo': { call: 100 }, 'JJ': { call: 100 }, 'JTs': { call: 100 },
+    'J9s': { call: 100 }, 'J8s': { call: 100 }, 'J7s': { call: 100 }, 'J6s': { call: 100 }, 'J5s': { call: 100 },
+    'J4s': { call: 100 }, 'J3s': { call: 100 }, 'J2s': { call: 100 },
+    'ATo': { allin: 65, call: 35 }, 'KTo': { call: 100 }, 'QTo': { call: 100 }, 'JTo': { call: 100 }, 'TT': { call: 100 },
+    'T9s': { call: 100 }, 'T8s': { call: 100 }, 'T7s': { call: 100 }, 'T6s': { call: 100 }, 'T5s': { call: 100 },
+    'T4s': { call: 100 }, 'T3s': { call: 100 }, 'T2s': { call: 100 },
+    'A9o': { allin: 75, call: 25 }, 'K9o': { call: 100 }, 'Q9o': { call: 100 }, 'J9o': { call: 100 }, 'T9o': { call: 100 },
+    '99':  { call: 100 }, '98s': { call: 100 }, '97s': { call: 100 }, '96s': { call: 100 }, '95s': { call: 100 },
+    '94s': { call: 100 }, '93s': { call: 100 }, '92s': { call: 100 },
+    'A8o': { allin: 10, call: 90 }, 'K8o': { call: 100 }, 'Q8o': { call: 100 }, 'J8o': { call: 100 }, 'T8o': { call: 100 },
+    '98o': { call: 100 }, '88':  { call: 100 }, '87s': { call: 100 }, '86s': { call: 100 }, '85s': { call: 100 },
+    '84s': { call: 100 }, '83s': { call: 65, fold: 35 }, '82s': { call: 45, fold: 55 },
+    'A7o': { call: 100 }, 'K7o': { call: 100 }, 'Q7o': { call: 100 }, 'J7o': { call: 65, fold: 35 },
+    'T7o': { call: 65, fold: 35 }, '97o': { call: 60, fold: 40 }, '87o': { call: 100 }, '77': { allin: 100 },
+    '76s': { call: 100 }, '75s': { call: 100 }, '74s': { call: 100 }, '73s': { call: 100 }, '72s': { fold: 100 },
+    'A6o': { call: 100 }, 'K6o': { allin: 10, call: 90 }, 'Q6o': { call: 100 },
+    'J6o': { fold: 100 }, 'T6o': { fold: 100 }, '96o': { fold: 100 }, '86o': { fold: 100 },
+    '76o': { call: 60, fold: 40 }, '66': { allin: 100 }, '65s': { call: 100 }, '64s': { call: 100 },
+    '63s': { call: 100 }, '62s': { call: 100 },
+    'A5o': { call: 100 }, 'K5o': { allin: 20, call: 80 }, 'Q5o': { call: 45, fold: 55 },
+    'J5o': { fold: 100 }, 'T5o': { fold: 100 }, '95o': { fold: 100 }, '85o': { fold: 100 }, '75o': { fold: 100 },
+    '65o': { call: 20, fold: 80 }, '55': { allin: 100 }, '54s': { call: 100 }, '53s': { call: 100 }, '52s': { call: 100 },
+    'A4o': { allin: 75, call: 25 }, 'K4o': { allin: 40, call: 60 },
+    'Q4o': { fold: 100 }, 'J4o': { fold: 100 }, 'T4o': { fold: 100 }, '94o': { fold: 100 }, '84o': { fold: 100 },
+    '74o': { fold: 100 }, '64o': { fold: 100 }, '54o': { call: 85, fold: 15 }, '44': { allin: 100 },
+    '43s': { call: 100 }, '42s': { call: 100 },
+    'A3o': { allin: 100 }, 'K3o': { allin: 35, call: 65 },
+    'Q3o': { fold: 100 }, 'J3o': { fold: 100 }, 'T3o': { fold: 100 }, '93o': { fold: 100 }, '83o': { fold: 100 },
+    '73o': { fold: 100 }, '63o': { fold: 100 }, '53o': { fold: 100 }, '43o': { fold: 100 },
+    '33':  { allin: 100 }, '32s': { call: 100 },
+    'A2o': { allin: 100 }, 'K2o': { call: 35, fold: 65 },
+    'Q2o': { fold: 100 }, 'J2o': { fold: 100 }, 'T2o': { fold: 100 }, '92o': { fold: 100 }, '82o': { fold: 100 },
+    '72o': { fold: 100 }, '62o': { fold: 100 }, '52o': { fold: 100 }, '42o': { fold: 100 }, '32o': { fold: 100 },
+    '22':  { allin: 100 }
+  };
+
+  const RANGE_149_25BB_RAW = {
+    'AA':  { raise: 100 }, 'AKs': { raise: 100 }, 'AQs': { raise: 100 }, 'AJs': { raise: 100 },
+    'ATs': { raise: 100 }, 'A9s': { raise: 100 }, 'A8s': { raise: 100 }, 'A7s': { raise: 100 },
+    'A6s': { call: 100 }, 'A5s': { call: 100 }, 'A4s': { call: 100 }, 'A3s': { call: 100 }, 'A2s': { call: 100 },
+    'AKo': { raise: 100 }, 'KK': { raise: 100 }, 'KQs': { raise: 100 }, 'KJs': { raise: 85, call: 15 },
+    'KTs': { raise: 70, call: 30 }, 'K9s': { raise: 10, call: 90 }, 'K8s': { call: 100 }, 'K7s': { call: 100 },
+    'K6s': { call: 100 }, 'K5s': { call: 100 }, 'K4s': { call: 100 }, 'K3s': { call: 100 }, 'K2s': { call: 100 },
+    'AQo': { raise: 100 }, 'KQo': { raise: 55, call: 45 }, 'QQ': { raise: 100 }, 'QJs': { raise: 15, call: 85 },
+    'QTs': { call: 100 }, 'Q9s': { call: 100 }, 'Q8s': { call: 100 }, 'Q7s': { call: 100 },
+    'Q6s': { call: 100 }, 'Q5s': { call: 100 }, 'Q4s': { call: 100 }, 'Q3s': { call: 100 }, 'Q2s': { call: 100 },
+    'AJo': { raise: 100 }, 'KJo': { raise: 45, call: 55 }, 'QJo': { raise: 35, call: 65 }, 'JJ': { raise: 100 },
+    'JTs': { raise: 15, call: 85 }, 'J9s': { call: 100 }, 'J8s': { call: 100 }, 'J7s': { call: 100 },
+    'J6s': { call: 100 }, 'J5s': { call: 100 }, 'J4s': { raise: 20, call: 80 }, 'J3s': { raise: 25, call: 75 }, 'J2s': { raise: 20, call: 80 },
+    'ATo': { raise: 100 }, 'KTo': { raise: 40, call: 60 }, 'QTo': { raise: 40, call: 60 }, 'JTo': { raise: 15, call: 85 },
+    'TT':  { raise: 100 }, 'T9s': { call: 100 }, 'T8s': { call: 100 }, 'T7s': { call: 100 },
+    'T6s': { raise: 10, call: 90 }, 'T5s': { raise: 20, call: 80 }, 'T4s': { raise: 25, call: 75 }, 'T3s': { raise: 25, call: 75 }, 'T2s': { raise: 30, call: 70 },
+    'A9o': { allin: 50, raise: 50 }, 'K9o': { raise: 65, call: 35 }, 'Q9o': { raise: 45, call: 55 },
+    'J9o': { raise: 35, call: 65 }, 'T9o': { raise: 30, call: 70 }, '99': { raise: 100 },
+    '98s': { call: 100 }, '97s': { call: 100 }, '96s': { raise: 10, call: 90 }, '95s': { raise: 15, call: 85 },
+    '94s': { raise: 30, call: 70 }, '93s': { raise: 25, call: 75 }, '92s': { raise: 30, call: 70 },
+    'A8o': { allin: 75, raise: 25 }, 'K8o': { raise: 60, call: 40 }, 'Q8o': { raise: 45, call: 55 },
+    'J8o': { raise: 30, call: 70 }, 'T8o': { raise: 20, call: 80 }, '98o': { raise: 20, call: 80 },
+    '88':  { raise: 100 }, '87s': { call: 100 }, '86s': { call: 100 }, '85s': { raise: 15, call: 85 },
+    '84s': { raise: 30, call: 70 }, '83s': { raise: 25, call: 75 }, '82s': { raise: 30, call: 70 },
+    'A7o': { allin: 35, call: 65 }, 'K7o': { raise: 30, call: 70 }, 'Q7o': { raise: 30, call: 70 },
+    'J7o': { raise: 35, call: 65 }, 'T7o': { raise: 40, call: 60 }, '97o': { raise: 30, call: 70 },
+    '87o': { raise: 25, call: 75 }, '77': { raise: 100 }, '76s': { call: 100 }, '75s': { raise: 10, call: 90 },
+    '74s': { raise: 30, call: 70 }, '73s': { raise: 30, call: 70 }, '72s': { raise: 35, call: 65 },
+    'A6o': { raise: 20, call: 80 }, 'K6o': { call: 100 }, 'Q6o': { raise: 10, call: 90 },
+    'J6o': { raise: 30, call: 70 }, 'T6o': { raise: 45, call: 55 }, '96o': { raise: 45, call: 55 },
+    '86o': { raise: 35, call: 65 }, '76o': { raise: 25, call: 75 }, '66': { allin: 100 },
+    '65s': { raise: 15, call: 85 }, '64s': { raise: 25, call: 75 }, '63s': { raise: 30, call: 70 }, '62s': { raise: 30, call: 70 },
+    'A5o': { raise: 15, call: 85 }, 'K5o': { call: 100 }, 'Q5o': { raise: 15, call: 85 },
+    'J5o': { raise: 40, call: 60 }, 'T5o': { raise: 45, call: 55 }, '95o': { raise: 45, call: 55 },
+    '85o': { raise: 40, call: 60 }, '75o': { raise: 40, call: 60 }, '65o': { raise: 35, call: 65 },
+    '55':  { allin: 100 }, '54s': { call: 100 }, '53s': { call: 100 }, '52s': { call: 100 },
+    'A4o': { raise: 20, call: 80 }, 'K4o': { raise: 25, call: 75 }, 'Q4o': { raise: 20, call: 80 },
+    'J4o': { raise: 45, call: 55 }, 'T4o': { raise: 45, call: 55 }, '94o': { raise: 45, call: 55 },
+    '84o': { raise: 45, call: 55 }, '74o': { raise: 45, call: 55 }, '64o': { raise: 30, call: 70 },
+    '54o': { raise: 30, call: 70 }, '44': { allin: 100 }, '43s': { call: 100 }, '42s': { raise: 10, call: 90 },
+    'A3o': { raise: 15, call: 85 }, 'K3o': { raise: 25, call: 75 }, 'Q3o': { raise: 45, call: 55 },
+    'J3o': { raise: 50, call: 50 }, 'T3o': { raise: 50, call: 50 }, '93o': { raise: 45, call: 55 },
+    '83o': { raise: 45, call: 55 }, '73o': { raise: 45, call: 55 }, '63o': { raise: 45, call: 55 },
+    '53o': { raise: 25, call: 75 }, '43o': { raise: 30, call: 70 }, '33': { allin: 100 }, '32s': { raise: 15, call: 85 },
+    'A2o': { allin: 75, call: 25 }, 'K2o': { raise: 30, call: 70 }, 'Q2o': { raise: 45, call: 55 },
+    'J2o': { raise: 50, call: 50 }, 'T2o': { raise: 50, call: 50 }, '92o': { raise: 50, call: 50 },
+    '82o': { raise: 45, call: 55 }, '72o': { raise: 45, call: 55 }, '62o': { raise: 45, call: 55 },
+    '52o': { raise: 40, call: 60 }, '42o': { raise: 40, call: 60 }, '32o': { raise: 40, call: 60 },
+    '22':  { allin: 100 }
+  };
+
+  const RANGE_150_25BB_RAW = {
+    'AA':  { call: 100 }, 'AKs': { call: 100 }, 'AQs': { call: 100 }, 'AJs': { call: 100 },
+    'ATs': { call: 100 }, 'A9s': { call: 100 }, 'A8s': { call: 100 }, 'A7s': { call: 100 },
+    'AKo': { call: 100 }, 'KK':  { call: 100 }, 'KQs': { call: 100 }, 'KJs': { call: 100 },
+    'KTs': { call: 100 }, 'K9s': { fold: 100 },
+    'AQo': { call: 100 }, 'KQo': { call: 100 }, 'QQ':  { call: 100 }, 'QJs': { call: 100 },
+    'AJo': { call: 100 }, 'KJo': { fold: 100 }, 'QJo': { fold: 100 }, 'JJ':  { call: 100 },
+    'JTs': { call: 100 }, 'J5s': { fold: 100 }, 'J4s': { fold: 100 }, 'J3s': { fold: 100 }, 'J2s': { fold: 100 },
+    'ATo': { call: 100 }, 'KTo': { fold: 100 }, 'QTo': { fold: 100 }, 'JTo': { fold: 100 },
+    'TT':  { call: 100 }, 'T7s': { fold: 100 }, 'T6s': { fold: 100 }, 'T5s': { fold: 100 },
+    'T4s': { fold: 100 }, 'T3s': { fold: 100 }, 'T2s': { fold: 100 },
+    'A9o': { call: 100 }, 'K9o': { fold: 100 }, 'Q9o': { fold: 100 }, 'J9o': { fold: 100 }, 'T9o': { fold: 100 },
+    '99':  { call: 100 }, '96s': { fold: 100 }, '95s': { fold: 100 }, '94s': { fold: 100 }, '93s': { fold: 100 }, '92s': { fold: 100 },
+    'A8o': { call: 100 }, 'K8o': { fold: 100 }, 'Q8o': { fold: 100 }, 'J8o': { fold: 100 }, 'T8o': { fold: 100 }, '98o': { fold: 100 },
+    '88':  { call: 100 }, '86s': { fold: 100 }, '85s': { fold: 100 }, '84s': { fold: 100 }, '83s': { fold: 100 }, '82s': { fold: 100 },
+    'K7o': { fold: 100 }, 'Q7o': { fold: 100 }, 'J7o': { fold: 100 }, 'T7o': { fold: 100 }, '97o': { fold: 100 }, '87o': { fold: 100 },
+    '77':  { call: 100 }, '76s': { fold: 100 }, '75s': { fold: 100 }, '74s': { fold: 100 }, '73s': { fold: 100 }, '72s': { fold: 100 },
+    'A6o': { fold: 100 }, 'K6o': { fold: 100 }, 'Q6o': { fold: 100 }, 'J6o': { fold: 100 }, 'T6o': { fold: 100 }, '96o': { fold: 100 }, '86o': { fold: 100 }, '76o': { fold: 100 },
+    '65s': { fold: 100 }, '64s': { fold: 100 }, '63s': { fold: 100 }, '62s': { fold: 100 },
+    'A5o': { fold: 100 }, 'K5o': { fold: 100 }, 'Q5o': { fold: 100 }, 'J5o': { fold: 100 }, 'T5o': { fold: 100 }, '95o': { fold: 100 }, '85o': { fold: 100 }, '75o': { fold: 100 }, '65o': { fold: 100 },
+    '54s': { fold: 100 }, '53s': { fold: 100 },
+    'A4o': { fold: 100 }, 'K4o': { fold: 100 }, 'Q4o': { fold: 100 }, 'J4o': { fold: 100 }, 'T4o': { fold: 100 }, '94o': { fold: 100 }, '84o': { fold: 100 }, '74o': { fold: 100 }, '64o': { fold: 100 }, '54o': { fold: 100 },
+    '43s': { fold: 100 }, '42s': { fold: 100 },
+    'A3o': { fold: 100 }, 'K3o': { fold: 100 }, 'Q3o': { fold: 100 }, 'J3o': { fold: 100 }, 'T3o': { fold: 100 }, '93o': { fold: 100 }, '83o': { fold: 100 }, '73o': { fold: 100 }, '63o': { fold: 100 }, '53o': { fold: 100 }, '43o': { fold: 100 },
+    '32s': { fold: 100 },
+    'K2o': { fold: 100 }, 'Q2o': { fold: 100 }, 'J2o': { fold: 100 }, 'T2o': { fold: 100 }, '92o': { fold: 100 }, '82o': { fold: 100 }, '72o': { fold: 100 }, '62o': { fold: 100 }, '52o': { fold: 100 }, '42o': { fold: 100 }, '32o': { fold: 100 }
+  };
+
+  const RANGE_165_25BB_RAW = {
+    'AA':  { raise: 100 }, 'AKs': { raise: 100 },
+    'AQs': { call: 100 }, 'AJs': { call: 100 }, 'ATs': { call: 100 }, 'A9s': { call: 100 },
+    'A8s': { call: 100 }, 'A7s': { call: 100 }, 'A6s': { call: 100 }, 'A5s': { allin: 100 },
+    'A4s': { call: 100 }, 'A3s': { call: 100 }, 'A2s': { call: 100 },
+    'AKo': { allin: 65, raise: 35 }, 'KK': { raise: 100 },
+    'KQs': { call: 100 }, 'KJs': { call: 100 }, 'KTs': { call: 100 }, 'K9s': { call: 100 },
+    'K8s': { call: 100 }, 'K7s': { call: 100 }, 'K6s': { call: 100 }, 'K5s': { call: 100 },
+    'K4s': { call: 100 }, 'K3s': { call: 100 }, 'K2s': { call: 100 },
+    'AQo': { raise: 25, call: 75 }, 'KQo': { raise: 10, call: 90 }, 'QQ': { raise: 100 },
+    'QJs': { allin: 100 }, 'QTs': { call: 100 }, 'Q9s': { call: 100 }, 'Q8s': { call: 100 },
+    'Q7s': { call: 100 }, 'Q6s': { call: 100 }, 'Q5s': { call: 100 }, 'Q4s': { call: 100 },
+    'Q3s': { call: 100 }, 'Q2s': { call: 100 },
+    'AJo': { call: 100 }, 'KJo': { call: 100 }, 'QJo': { raise: 35, call: 65 },
+    'JJ':  { allin: 65, raise: 35 }, 'JTs': { call: 100 }, 'J9s': { call: 100 }, 'J8s': { call: 100 },
+    'J7s': { call: 100 }, 'J6s': { call: 100 }, 'J5s': { call: 100 }, 'J4s': { call: 100 },
+    'J3s': { call: 100 }, 'J2s': { call: 100 },
+    'ATo': { raise: 25, call: 75 }, 'KTo': { raise: 30, call: 70 }, 'QTo': { call: 100 }, 'JTo': { call: 100 },
+    'TT':  { allin: 100 }, 'T9s': { call: 100 }, 'T8s': { call: 100 }, 'T7s': { call: 100 },
+    'T6s': { call: 100 }, 'T5s': { call: 100 }, 'T4s': { call: 100 }, 'T3s': { call: 100 }, 'T2s': { call: 100 },
+    'A9o': { raise: 25, call: 75 }, 'K9o': { raise: 20, call: 80 }, 'Q9o': { call: 100 }, 'J9o': { call: 100 }, 'T9o': { call: 100 },
+    '99':  { raise: 80, call: 20 }, '98s': { call: 100 }, '97s': { call: 100 }, '96s': { call: 100 },
+    '95s': { call: 100 }, '94s': { call: 100 }, '93s': { call: 100 }, '92s': { call: 100 },
+    'A8o': { call: 100 }, 'K8o': { call: 100 }, 'Q8o': { call: 100 }, 'J8o': { call: 100 }, 'T8o': { call: 100 }, '98o': { call: 100 },
+    '88':  { call: 100 }, '87s': { call: 100 }, '86s': { call: 100 }, '85s': { call: 100 },
+    '84s': { call: 100 }, '83s': { call: 100 }, '82s': { call: 100 },
+    'A7o': { call: 100 }, 'K7o': { call: 100 }, 'Q7o': { call: 100 }, 'J7o': { fold: 100 },
+    'T7o': { call: 100 }, '97o': { call: 100 }, '87o': { call: 100 }, '77':  { call: 100 },
+    '76s': { call: 100 }, '75s': { call: 100 }, '74s': { call: 100 }, '73s': { call: 100 }, '72s': { call: 100 },
+    'A6o': { call: 100 }, 'K6o': { raise: 15, call: 85 }, 'Q6o': { call: 100 },
+    'J6o': { fold: 100 }, 'T6o': { fold: 100 }, '96o': { call: 100 }, '86o': { call: 100 }, '76o': { call: 100 },
+    '66':  { call: 100 }, '65s': { call: 100 }, '64s': { call: 100 }, '63s': { call: 100 }, '62s': { call: 100 },
+    'A5o': { raise: 20, call: 80 }, 'K5o': { raise: 20, call: 80 }, 'Q5o': { call: 100 },
+    'J5o': { fold: 100 }, 'T5o': { fold: 100 }, '95o': { fold: 100 }, '85o': { fold: 100 },
+    '75o': { call: 100 }, '65o': { call: 100 }, '55':  { allin: 25, raise: 45, call: 30 },
+    '54s': { call: 100 }, '53s': { call: 100 }, '52s': { call: 100 },
+    'A4o': { raise: 35, call: 65 }, 'K4o': { raise: 10, call: 90 }, 'Q4o': { call: 25, fold: 75 },
+    'J4o': { fold: 100 }, 'T4o': { fold: 100 }, '94o': { fold: 100 }, '84o': { fold: 100 }, '74o': { fold: 100 },
+    '64o': { call: 100 }, '54o': { call: 100 }, '44':  { call: 100 }, '43s': { call: 100 }, '42s': { call: 100 },
+    'A3o': { call: 100 }, 'K3o': { call: 100 },
+    'Q3o': { fold: 100 }, 'J3o': { fold: 100 }, 'T3o': { fold: 100 }, '93o': { fold: 100 }, '83o': { fold: 100 }, '73o': { fold: 100 }, '63o': { fold: 100 },
+    '53o': { call: 100 }, '43o': { call: 100 }, '33':  { call: 100 }, '32s': { call: 100 },
+    'A2o': { call: 100 }, 'K2o': { call: 25, fold: 75 },
+    'Q2o': { fold: 100 }, 'J2o': { fold: 100 }, 'T2o': { fold: 100 }, '92o': { fold: 100 }, '82o': { fold: 100 },
+    '72o': { fold: 100 }, '62o': { fold: 100 }, '52o': { fold: 100 }, '42o': { fold: 100 }, '32o': { fold: 100 },
+    '22':  { call: 100 }
+  };
+
+  const RANGE_166_25BB_RAW = {
+    'AA':  { call: 100 }, 'AKs': { call: 100 },
+    'AKo': { call: 100 }, 'KK':  { call: 100 },
+    'AQo': { call: 35, fold: 65 }, 'KQo': { fold: 100 }, 'QQ':  { call: 100 },
+    'QJo': { fold: 100 }, 'JJ':  { call: 100 },
+    'ATo': { fold: 100 }, 'KTo': { fold: 100 },
+    'A9o': { fold: 100 }, 'K9o': { fold: 100 }, '99':  { call: 100 },
+    'K6o': { fold: 100 },
+    'A5o': { fold: 100 }, 'K5o': { fold: 100 }, '55':  { call: 100 },
+    'A4o': { fold: 100 }, 'K4o': { fold: 100 }
+  };
+
+  // ============================================================================
+  // 25BB SCENARIOS DICTIONARY (24 SPOTS)
+  // ============================================================================
+  const SCENARIOS = {
+    // --- UTG / UTG+1 (25bb) ---
+    utg_25_open: {
+      id: 'utg_25_open', stack: '25', group: 'UTG',
+      title: 'Hand Range 137: UTG 25bb PFI', pos: 'UTG', spot: 'Open Raise (PFI)',
+      banner: 'Action on Hero (UTG 25bb) — First to Act', isConditional: false, raw: RANGE_137_25BB_RAW,
+      borderline: ['A4s','A3s','K9s','K8s','K7s','K6s','Q9s','Q8s','J9s','J8s','T8s','T7s','98s','87s','76s','65s','ATo','A9o','KJo','KTo','QJo','77','66','55'],
+      legend: [{ label: 'Raise 2x 16.8%', color: 'var(--color-raise)' }, { label: 'Fold 83.2%', color: 'var(--color-fold)' }],
+      actions: [
+        { code: 'fold',  label: 'FOLD',     sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'CALL 1bb', sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'raise', label: 'OPEN 2x',  sub: 'Key [3 / R]', cls: 'btn-raise' }
+      ]
+    },
+    utg1_25_vs_open: {
+      id: 'utg1_25_vs_open', stack: '25', group: 'UTG',
+      title: 'Hand Range 261: UTG+1 vs UTG (25bb)', pos: 'UTG+1', spot: 'vs UTG Open',
+      banner: 'UTG Opens 2x (25bb) → Action on Hero (UTG+1)', isConditional: false, raw: RANGE_261_25BB_RAW,
+      borderline: ['AA','AQs','AJs','ATs','A9s','A8s','A5s','A4s','AKo','KQs','KJs','KTs','K9s','AQo','KQo','QQ','QJs','QTs','AJo','JJ','JTs','ATo','TT','99','88','77','66','55'],
+      legend: [{ label: '3-bet 5.1%', color: 'var(--color-raise)' }, { label: 'Call 3.6%', color: 'var(--color-call)' }, { label: 'Fold 91.2%', color: 'var(--color-fold)' }],
+      actions: [
+        { code: 'fold',  label: 'FOLD',  sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'CALL',  sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'raise', label: '3-BET', sub: 'Key [3 / R]', cls: 'btn-raise' }
+      ]
+    },
+    utg_25_vs_3bet: {
+      id: 'utg_25_vs_3bet', stack: '25', group: 'UTG',
+      title: 'Hand Range 313: UTG 25bb (2x vs BB 3.25x 3-bet)', pos: 'UTG', spot: '2x Open vs 3-Bet',
+      banner: 'Hero (UTG 25bb) Opens 2x → BB 3-Bets 3.25x → Hero', isConditional: true, raw: RANGE_313_25BB_RAW,
+      borderline: Object.keys(RANGE_313_25BB_RAW),
+      legend: [{ label: 'All-in 17.2%', color: 'var(--color-allin)' }, { label: 'Call 44.5%', color: 'var(--color-call)' }, { label: 'Fold 38.3%', color: 'var(--color-fold)' }],
+      actions: [
+        { code: 'fold',  label: 'FOLD',   sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'CALL',   sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'allin', label: 'ALL-IN', sub: 'Key [3 / A]', cls: 'btn-allin' }
+      ]
+    },
+    utg1_25_vs_4bet: {
+      id: 'utg1_25_vs_4bet', stack: '25', group: 'UTG',
+      title: 'Hand Range 262: UTG+1 vs UTG 4-bet (25bb)', pos: 'UTG+1', spot: 'vs UTG 4-Bet',
+      banner: 'UTG Opens → Hero 3B → UTG 4-Bets → Action on Hero', isConditional: true, raw: RANGE_262_25BB_RAW,
+      borderline: Object.keys(RANGE_262_25BB_RAW),
+      legend: [{ label: 'Call 59.7%', color: 'var(--color-call)' }, { label: 'Fold 40.3%', color: 'var(--color-fold)' }],
+      actions: [
+        { code: 'fold', label: 'FOLD', sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call', label: 'CALL', sub: 'Key [2 / C]', cls: 'btn-call' }
+      ]
+    },
+
+    // --- LJ / HJ (25bb) ---
+    hj_25_open: {
+      id: 'hj_25_open', stack: '25', group: 'HJ',
+      title: 'Hand Range 121: HJ 25bb PFI', pos: 'LJ / HJ', spot: 'Open Raise (PFI)',
+      banner: 'Action on Hero (LJ/HJ 25bb) — Unopened Pot', isConditional: false, raw: RANGE_121_25BB_RAW,
+      borderline: ['K5s','K4s','K3s','Q7s','Q6s','Q5s','J8s','J7s','J6s','T8s','T7s','T6s','97s','96s','87s','86s','76s','75s','65s','54s','A8o','A7o','A6o','A5o','KTo','K9o','QTo','JTo','T9o','55','44','33'],
+      legend: [{ label: 'Raise 2x 27.8%', color: 'var(--color-raise)' }, { label: 'Fold 72.2%', color: 'var(--color-fold)' }],
+      actions: [
+        { code: 'fold',  label: 'FOLD',     sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'CALL 1bb', sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'raise', label: 'OPEN 2x',  sub: 'Key [3 / R]', cls: 'btn-raise' }
+      ]
+    },
+    hj_25_vs_open: {
+      id: 'hj_25_vs_open', stack: '25', group: 'HJ',
+      title: 'Hand Range 250: HJ vs UTG (25bb)', pos: 'LJ / HJ', spot: 'vs UTG Open',
+      banner: 'UTG Opens 2x (25bb) → Action on Hero (LJ/HJ)', isConditional: false, raw: RANGE_250_25BB_RAW,
+      borderline: ['AA','AKs','AQs','AJs','ATs','A9s','A8s','A7s','A5s','A4s','AKo','KK','KQs','KJs','KTs','K9s','AQo','KQo','QQ','QJs','QTs','AJo','JJ','JTs','ATo','TT','T9s','99','88','77','76s','66','65s','55','44'],
+      legend: [
+        { label: 'All-in 1.1%', color: 'var(--color-allin)' },
+        { label: '3-bet 3.9%', color: 'var(--color-raise)' },
+        { label: 'Call 8%', color: 'var(--color-call)' },
+        { label: 'Fold 87%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold',  label: 'FOLD',   sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'CALL',   sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'raise', label: '3-BET',  sub: 'Key [3 / R]', cls: 'btn-raise' },
+        { code: 'allin', label: 'ALL-IN', sub: 'Key [4 / A]', cls: 'btn-allin' }
+      ]
+    },
+    hj_25_vs_3bet: {
+      id: 'hj_25_vs_3bet', stack: '25', group: 'HJ',
+      title: 'Hand Range 281: LJ 25bb (2x vs BB All-in)', pos: 'LJ / HJ', spot: '2x Open vs All-in',
+      banner: 'Hero (LJ/HJ 25bb) Opens 2x → BB Shoves All-in → Hero', isConditional: true, raw: RANGE_281_25BB_RAW,
+      borderline: Object.keys(RANGE_281_25BB_RAW),
+      legend: [{ label: 'Call All-in 32.5%', color: 'var(--color-call)' }, { label: 'Fold 67.5%', color: 'var(--color-fold)' }],
+      actions: [
+        { code: 'fold', label: 'FOLD',        sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call', label: 'CALL ALL-IN', sub: 'Key [2 / C]', cls: 'btn-call' }
+      ]
+    },
+    hj_25_vs_4bet: {
+      id: 'hj_25_vs_4bet', stack: '25', group: 'HJ',
+      title: 'Hand Range 251: HJ vs UTG 4-bet (25bb)', pos: 'LJ / HJ', spot: 'vs UTG 4-Bet',
+      banner: 'UTG Opens → Hero 3B → UTG 4-Bets → Action on Hero', isConditional: true, raw: RANGE_251_25BB_RAW,
+      borderline: Object.keys(RANGE_251_25BB_RAW),
+      legend: [{ label: 'Call 62.9%', color: 'var(--color-call)' }, { label: 'Fold 37.1%', color: 'var(--color-fold)' }],
+      actions: [
+        { code: 'fold', label: 'FOLD', sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call', label: 'CALL', sub: 'Key [2 / C]', cls: 'btn-call' }
+      ]
+    },
+
+    // --- BN (25bb) ---
+    bn_25_open: {
+      id: 'bn_25_open', stack: '25', group: 'BN',
+      title: 'Hand Range 113: BN 25bb PFI', pos: 'BN', spot: 'Open Raise (PFI)',
+      banner: 'Action on Hero (BN 25bb) — Unopened Pot', isConditional: false, raw: RANGE_113_25BB_RAW,
+      borderline: ['Q3s','Q2s','J5s','J4s','J3s','T6s','T5s','T4s','96s','95s','94s','85s','84s','75s','74s','65s','64s','54s','53s','43s','K7o','K6o','K5o','Q8o','Q7o','J8o','J7o','T8o','T7o','98o','97o','44','33','22'],
+      legend: [{ label: 'Raise 2x 46.3%', color: 'var(--color-raise)' }, { label: 'Fold 53.7%', color: 'var(--color-fold)' }],
+      actions: [
+        { code: 'fold',  label: 'FOLD',     sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'CALL 1bb', sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'raise', label: 'OPEN 2x',  sub: 'Key [3 / R]', cls: 'btn-raise' }
+      ]
+    },
+    bn_25_vs_open: {
+      id: 'bn_25_vs_open', stack: '25', group: 'BN',
+      title: 'Hand Range 218: BN vs UTG (25bb)', pos: 'BN', spot: 'vs UTG Open',
+      banner: 'UTG Opens 2x (25bb) → Action on Hero (BN)', isConditional: false, raw: RANGE_218_25BB_RAW,
+      borderline: ['AA','A9s','A8s','A7s','A6s','A5s','A4s','A3s','A2s','AKo','K9s','K8s','K7s','AQo','QQ','QJs','Q9s','Q8s','AJo','KJo','QJo','JJ','J9s','J8s','ATo','TT','T9s','T8s','99','98s','88','87s','77','76s','66','65s','55','54s','44','33','22'],
+      legend: [
+        { label: 'All-in 1.2%', color: 'var(--color-allin)' },
+        { label: '3-bet 3.7%', color: 'var(--color-raise)' },
+        { label: 'Call 14.6%', color: 'var(--color-call)' },
+        { label: 'Fold 80.5%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold',  label: 'FOLD',   sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'CALL',   sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'raise', label: '3-BET',  sub: 'Key [3 / R]', cls: 'btn-raise' },
+        { code: 'allin', label: 'ALL-IN', sub: 'Key [4 / A]', cls: 'btn-allin' }
+      ]
+    },
+    bn_25_vs_3bet: {
+      id: 'bn_25_vs_3bet', stack: '25', group: 'BN',
+      title: 'Hand Range 295: BN 25bb (2x vs BB 3-bet)', pos: 'BN', spot: '2x Open vs BB 3-Bet',
+      banner: 'Hero (BN 25bb) Opens 2x → BB 3-Bets → Action on Hero', isConditional: true, raw: RANGE_295_25BB_RAW,
+      borderline: Object.keys(RANGE_295_25BB_RAW),
+      legend: [
+        { label: 'All-in 12.4%', color: 'var(--color-allin)' },
+        { label: 'Call 45.4%', color: 'var(--color-call)' },
+        { label: 'Fold 42.2%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold',  label: 'FOLD',   sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'CALL',   sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'allin', label: 'ALL-IN', sub: 'Key [3 / A]', cls: 'btn-allin' }
+      ]
+    },
+    bn_25_vs_4bet: {
+      id: 'bn_25_vs_4bet', stack: '25', group: 'BN',
+      title: 'Hand Range 219: BN vs UTG 4-bet (25bb)', pos: 'BN', spot: 'vs UTG 4-Bet',
+      banner: 'UTG Opens → Hero 3B → UTG 4-Bets → Action on Hero', isConditional: true, raw: RANGE_219_25BB_RAW,
+      borderline: Object.keys(RANGE_219_25BB_RAW),
+      legend: [{ label: 'Call 59.3%', color: 'var(--color-call)' }, { label: 'Fold 40.7%', color: 'var(--color-fold)' }],
+      actions: [
+        { code: 'fold', label: 'FOLD', sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call', label: 'CALL', sub: 'Key [2 / C]', cls: 'btn-call' }
+      ]
+    },
+
+    // --- SB (25bb) ---
+    sb_25_pfi: {
+      id: 'sb_25_pfi', stack: '25', group: 'SB',
+      title: 'Hand Range 99: SB vs BB (25bb) PFI', pos: 'SB', spot: 'SB PFI (vs BB)',
+      banner: 'Unopened Pot → Action on Hero (SB 25bb vs BB)', isConditional: false, raw: RANGE_99_25BB_RAW,
+      borderline: ['AQs','AJs','A9s','A8s','A7s','A6s','A5s','AKo','KQs','KJs','KTs','K3s','K2s','AQo','KQo','Q7s','Q5s','Q4s','Q3s','Q2s','AJo','KJo','QJo','JJ','J6s','J5s','J4s','ATo','KTo','QTo','JTo','T6s','T5s','A9o','A8o','99','88','77','66','55','44','33','22','95o','85o','T4o','64o','53o','J2o'],
+      legend: [
+        { label: 'All-in 1.8%', color: 'var(--color-allin)' },
+        { label: 'Raise 3.3x 30%', color: 'var(--color-raise)' },
+        { label: 'Limp 50.3%', color: 'var(--color-call)' },
+        { label: 'Fold 17.9%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold',  label: 'FOLD',       sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'LIMP (1bb)', sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'raise', label: 'RAISE 3.3x', sub: 'Key [3 / R]', cls: 'btn-raise' },
+        { code: 'allin', label: 'ALL-IN',     sub: 'Key [4 / A]', cls: 'btn-allin' }
+      ]
+    },
+    sb_25_limp_vs_allin: {
+      id: 'sb_25_limp_vs_allin', stack: '25', group: 'SB',
+      title: 'Hand Range 100: SB vs BB 25bb (Limp vs All-in)', pos: 'SB', spot: 'Limp vs BB All-in',
+      banner: 'Hero (SB 25bb) Limps → BB Shoves All-in → Hero', isConditional: true, raw: RANGE_100_25BB_RAW,
+      borderline: Object.keys(RANGE_100_25BB_RAW),
+      legend: [
+        { label: 'Call All-in 15.2%', color: 'var(--color-call)' },
+        { label: 'Fold 84.8%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold', label: 'FOLD',        sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call', label: 'CALL ALL-IN', sub: 'Key [2 / C]', cls: 'btn-call' }
+      ]
+    },
+    sb_25_limp_vs_iso: {
+      id: 'sb_25_limp_vs_iso', stack: '25', group: 'SB',
+      title: 'Hand Range 101: SB vs BB 25bb (Limp vs 3.3x Raise)', pos: 'SB', spot: 'Limp vs 3.3x Iso',
+      banner: 'Hero (SB 25bb) Limps → BB Raises to 3.3x → Hero', isConditional: true, raw: RANGE_101_25BB_RAW,
+      borderline: Object.keys(RANGE_101_25BB_RAW),
+      legend: [
+        { label: 'Raise All-in 11%', color: 'var(--color-raise)' },
+        { label: 'Call 43.7%', color: 'var(--color-call)' },
+        { label: 'Fold 45.4%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold',  label: 'FOLD',         sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'CALL',         sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'raise', label: 'RAISE ALL-IN', sub: 'Key [3 / R]', cls: 'btn-raise' }
+      ]
+    },
+    sb_25_open_vs_allin: {
+      id: 'sb_25_open_vs_allin', stack: '25', group: 'SB',
+      title: 'Hand Range 102: SB vs BB 25bb (3.3x Open vs All-in)', pos: 'SB', spot: '3.3x Open vs All-in',
+      banner: 'Hero (SB 25bb) Opens 3.3x → BB Shoves All-in → Hero', isConditional: true, raw: RANGE_102_25BB_RAW,
+      borderline: Object.keys(RANGE_102_25BB_RAW),
+      legend: [
+        { label: 'Call All-in 30.1%', color: 'var(--color-call)' },
+        { label: 'Fold 69.9%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold', label: 'FOLD',        sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call', label: 'CALL ALL-IN', sub: 'Key [2 / C]', cls: 'btn-call' }
+      ]
+    },
+    sb_25_vs_open: {
+      id: 'sb_25_vs_open', stack: '25', group: 'SB',
+      title: 'Hand Range 193: SB vs UTG (25bb)', pos: 'SB', spot: 'vs UTG Open',
+      banner: 'UTG Opens 2x (25bb) → Action on Hero (SB)', isConditional: false, raw: RANGE_193_25BB_RAW,
+      borderline: ['AA','AKs','AQs','AJs','ATs','A9s','A8s','A7s','A6s','A5s','A4s','A3s','A2s','AKo','KK','KQs','KJs','KTs','K9s','K8s','K7s','K6s','K5s','AQo','KQo','QQ','QJs','QTs','Q9s','Q8s','Q6s','AJo','KJo','QJo','JJ','JTs','J9s','J8s','ATo','TT','T9s','T8s','99','98s','97s','88','87s','86s','77','76s','66','65s','55','54s','44','33','22'],
+      legend: [
+        { label: 'All-in 3.5%', color: 'var(--color-allin)' },
+        { label: '3-bet 4.8%', color: 'var(--color-raise)' },
+        { label: 'Call 14.2%', color: 'var(--color-call)' },
+        { label: 'Fold 77.5%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold',  label: 'FOLD',   sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'CALL',   sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'raise', label: '3-BET',  sub: 'Key [3 / R]', cls: 'btn-raise' },
+        { code: 'allin', label: 'ALL-IN', sub: 'Key [4 / A]', cls: 'btn-allin' }
+      ]
+    },
+    sb_25_vs_4bet: {
+      id: 'sb_25_vs_4bet', stack: '25', group: 'SB',
+      title: 'Hand Range 194: SB vs UTG 4-bet (25bb)', pos: 'SB', spot: 'vs UTG 4-Bet',
+      banner: 'UTG Opens → Hero 3B → UTG 4-Bets → Action on Hero', isConditional: true, raw: RANGE_194_25BB_RAW,
+      borderline: Object.keys(RANGE_194_25BB_RAW),
+      legend: [
+        { label: 'Call 52.8%', color: 'var(--color-call)' },
+        { label: 'Fold 47.2%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold', label: 'FOLD', sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call', label: 'CALL', sub: 'Key [2 / C]', cls: 'btn-call' }
+      ]
+    },
+
+    // --- BB (25bb) ---
+    bb_25_vs_sb_push: {
+      id: 'bb_25_vs_sb_push', stack: '25', group: 'BB',
+      title: 'Hand Range 141: BB vs SB Push (25bb)', pos: 'BB', spot: 'vs SB Push (All-in)',
+      banner: 'SB Open Shoves 25bb → Action on Hero (BB)', isConditional: false, raw: RANGE_141_25BB_RAW,
+      borderline: ['A7s','A6s','A5s','A4s','KTs','K9s','QTs','Q9s','JTs','J9s','AJo','KJo','QJo','ATo','KTo','A9o','A8o','A7o','A6o','A5o','66','55','44','33','22'],
+      legend: [
+        { label: 'Call 17.8%', color: 'var(--color-call)' },
+        { label: 'Fold 82.2%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold', label: 'FOLD', sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call', label: 'CALL', sub: 'Key [2 / C]', cls: 'btn-call' }
+      ]
+    },
+    bb_25_vs_sb_open: {
+      id: 'bb_25_vs_sb_open', stack: '25', group: 'BB',
+      title: 'Hand Range 142: BB vs SB 3.3x Raise (25bb)', pos: 'BB', spot: 'vs SB 3.3x Raise',
+      banner: 'SB Raises to 3.3x → Action on Hero (BB 25bb)', isConditional: false, raw: RANGE_142_25BB_RAW,
+      borderline: ['AA','AKs','AQs','AKo','AQo','AJo','ATo','A9o','A8o','A6o','A5o','A4o','A3o','A2o','K6o','K5o','K4o','K3o','K2o','Q5o','J7o','T7o','97o','76o','65o','54o','83s','82s','72s','88','77','66','55','44','33','22'],
+      legend: [
+        { label: 'All-in 10.6%', color: 'var(--color-allin)' },
+        { label: 'Call 53.8%', color: 'var(--color-call)' },
+        { label: 'Fold 35.6%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold',  label: 'FOLD',   sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'CALL',   sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'allin', label: 'ALL-IN', sub: 'Key [3 / A]', cls: 'btn-allin' }
+      ]
+    },
+    bb_25_vs_sb_limp: {
+      id: 'bb_25_vs_sb_limp', stack: '25', group: 'BB',
+      title: 'Hand Range 149: BB vs SB Limp (25bb)', pos: 'BB', spot: 'vs SB Limp',
+      banner: 'SB Limps (1bb) → Action on Hero (BB 25bb)', isConditional: false, raw: RANGE_149_25BB_RAW,
+      borderline: ['A7s','A6s','KJs','KTs','K9s','KQo','QJs','KJo','QJo','JTs','J4s','J3s','J2s','KTo','QTo','JTo','T6s','T5s','T4s','A9o','A8o','A7o','A6o','A5o','A4o','A3o','A2o','77','66','55','44','33','22'],
+      legend: [
+        { label: 'All-in 4.4%', color: 'var(--color-allin)' },
+        { label: 'Raise 3.3x 37.8%', color: 'var(--color-raise)' },
+        { label: 'Check 57.8%', color: 'var(--color-call)' }
+      ],
+      actions: [
+        { code: 'call',  label: 'CHECK',      sub: 'Key [1 / C]', cls: 'btn-call' },
+        { code: 'raise', label: 'RAISE 3.3x', sub: 'Key [2 / R]', cls: 'btn-raise' },
+        { code: 'allin', label: 'ALL-IN',     sub: 'Key [3 / A]', cls: 'btn-allin' }
+      ]
+    },
+    bb_25_vs_sb_limp_push: {
+      id: 'bb_25_vs_sb_limp_push', stack: '25', group: 'BB',
+      title: 'Hand Range 150: BB vs SB Limp-Push (25bb)', pos: 'BB', spot: 'vs SB Limp-Push',
+      banner: 'SB Limps → Hero Raises 3.3x → SB Shoves → Hero', isConditional: true, raw: RANGE_150_25BB_RAW,
+      borderline: Object.keys(RANGE_150_25BB_RAW),
+      legend: [
+        { label: 'Call 29.8%', color: 'var(--color-call)' },
+        { label: 'Fold 70.2%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold', label: 'FOLD', sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call', label: 'CALL', sub: 'Key [2 / C]', cls: 'btn-call' }
+      ]
+    },
+    bb_25_vs_utg_open: {
+      id: 'bb_25_vs_utg_open', stack: '25', group: 'BB',
+      title: 'Hand Range 165: BB vs UTG (25bb)', pos: 'BB', spot: 'vs UTG Open',
+      banner: 'UTG Opens 2x (25bb) → Action on Hero (BB)', isConditional: false, raw: RANGE_165_25BB_RAW,
+      borderline: ['AA','AKs','A5s','AKo','KK','AQo','KQo','QQ','QJs','QJo','JJ','ATo','KTo','TT','A9o','K9o','99','J7o','K6o','J6o','T6o','A5o','K5o','Q5o','75o','55','A4o','K4o','Q4o','64o','53o','K2o','22'],
+      legend: [
+        { label: 'All-in 2.1%', color: 'var(--color-allin)' },
+        { label: '3-bet 4.7%', color: 'var(--color-raise)' },
+        { label: 'Call 66%', color: 'var(--color-call)' },
+        { label: 'Fold 27.2%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold',  label: 'FOLD',   sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call',  label: 'CALL',   sub: 'Key [2 / C]', cls: 'btn-call' },
+        { code: 'raise', label: '3-BET',  sub: 'Key [3 / R]', cls: 'btn-raise' },
+        { code: 'allin', label: 'ALL-IN', sub: 'Key [4 / A]', cls: 'btn-allin' }
+      ]
+    },
+    bb_25_vs_utg_4bet: {
+      id: 'bb_25_vs_utg_4bet', stack: '25', group: 'BB',
+      title: 'Hand Range 166: BB vs UTG 4-bet (25bb)', pos: 'BB', spot: 'vs UTG 4-Bet',
+      banner: 'UTG Opens → Hero 3B → UTG 4-Bets → Action on Hero', isConditional: true, raw: RANGE_166_25BB_RAW,
+      borderline: Object.keys(RANGE_166_25BB_RAW),
+      legend: [
+        { label: 'Call 57.8%', color: 'var(--color-call)' },
+        { label: 'Fold 42.2%', color: 'var(--color-fold)' }
+      ],
+      actions: [
+        { code: 'fold', label: 'FOLD', sub: 'Key [1 / F]', cls: 'btn-fold' },
+        { code: 'call', label: 'CALL', sub: 'Key [2 / C]', cls: 'btn-call' }
+      ]
+    }
+  };
+
+  // ============================================================================
+  // NAVIGATION STRUCTURE (25BB COMPLETE — 24 SPOTS)
+  // ============================================================================
+  const NAV_25BB = {
+    positions: [
+      { key: 'UTG', label: 'UTG' },
+      { key: 'HJ',  label: 'LJ/HJ' },
+      { key: 'BN',  label: 'BN' },
+      { key: 'SB',  label: 'SB' },
+      { key: 'BB',  label: 'BB' },
+      { key: 'MIX', label: '🎲 MIX' }
+    ],
+    spots: {
+      UTG: [
+        { id: 'utg_25_open',     label: '1. UTG Open' },
+        { id: 'utg1_25_vs_open', label: '2. UTG+1 vs Open' },
+        { id: 'utg_25_vs_3bet',  label: '3. UTG vs 3B' },
+        { id: 'utg1_25_vs_4bet', label: '4. UTG+1 vs 4B' },
+        { id: 'mix_25_utg',      label: '🎲 Mix UTG' }
+      ],
+      HJ: [
+        { id: 'hj_25_open',      label: '5. LJ/HJ Open' },
+        { id: 'hj_25_vs_open',   label: '6. LJ/HJ vs Open' },
+        { id: 'hj_25_vs_3bet',   label: '7. LJ/HJ vs 3B' },
+        { id: 'hj_25_vs_4bet',   label: '8. LJ/HJ vs 4B' },
+        { id: 'mix_25_hj',       label: '🎲 Mix LJ/HJ' }
+      ],
+      BN: [
+        { id: 'bn_25_open',      label: '9. BN Open' },
+        { id: 'bn_25_vs_open',   label: '10. BN vs Open' },
+        { id: 'bn_25_vs_3bet',   label: '11. BN vs 3B' },
+        { id: 'bn_25_vs_4bet',   label: '12. BN vs 4B' },
+        { id: 'mix_25_bn',       label: '🎲 Mix BN' }
+      ],
+      SB: [
+        { id: 'sb_25_pfi',           label: '13. SB PFI' },
+        { id: 'sb_25_limp_vs_allin', label: '14. Limp vs All-in' },
+        { id: 'sb_25_limp_vs_iso',   label: '15. Limp vs 3.3x' },
+        { id: 'sb_25_open_vs_allin', label: '16. 3.3x vs All-in' },
+        { id: 'sb_25_vs_open',       label: '17. SB vs UTG' },
+        { id: 'sb_25_vs_4bet',       label: '18. SB vs 4B' },
+        { id: 'mix_25_sb',           label: '🎲 Mix SB' }
+      ],
+      BB: [
+        { id: 'bb_25_vs_sb_push',      label: '19. BB vs SB Push' },
+        { id: 'bb_25_vs_sb_open',      label: '20. BB vs SB 3.3x' },
+        { id: 'bb_25_vs_sb_limp',      label: '21. BB vs SB Limp' },
+        { id: 'bb_25_vs_sb_limp_push', label: '22. BB vs Limp-Push' },
+        { id: 'bb_25_vs_utg_open',     label: '23. BB vs UTG' },
+        { id: 'bb_25_vs_utg_4bet',     label: '24. BB vs UTG 4B' },
+        { id: 'mix_25_bb',             label: '🎲 Mix BB' }
+      ],
+      MIX: [
+        { id: 'mix_25_all', label: '🔥 All 24 Spots' },
+        { id: 'mix_25_utg', label: '🎲 Mix UTG' },
+        { id: 'mix_25_hj',  label: '🎲 Mix LJ/HJ' },
+        { id: 'mix_25_bn',  label: '🎲 Mix BN' },
+        { id: 'mix_25_sb',  label: '🎲 Mix SB' },
+        { id: 'mix_25_bb',  label: '🎲 Mix BB' }
+      ]
+    }
+  };
+
+  let currentPosKey = 'UTG';
+  let selectedSpotId = 'utg_25_open';
+  let activeScenario = SCENARIOS.utg_25_open;
+  let lastRenderedScenarioId = null;
+  let currentHand = null;
+  let answered = false;
+  let stats = { correct: 0, total: 0, streak: 0 };
+
+  // State for Hold-to-Peek (` or Touch Hold) vs Click-to-Toggle
+  let isHoldingPeek = false;
+  let maskWasCoveredBeforeHold = true;
+
+  function initNavigation() {
+    const totalCount = Object.keys(SCENARIOS).length;
+    document.getElementById('totalChartsTag').textContent = `${totalCount} Charts`;
+
+    const posContainer = document.getElementById('posButtonsContainer');
+    posContainer.innerHTML = `<span class="nav-label">Pos:</span>` + NAV_25BB.positions.map(p => `
+      <button class="pos-btn" id="posbtn-${p.key}" onclick="selectPos('${p.key}')">${p.label}</button>
+    `).join('');
+
+    selectPos(NAV_25BB.positions[0].key);
+  }
+
+  function selectPos(posKey) {
+    currentPosKey = posKey;
+    document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+    const posBtn = document.getElementById(`posbtn-${posKey}`);
+    if (posBtn) posBtn.classList.add('active');
+
+    const spots = NAV_25BB.spots[posKey];
+    const spotContainer = document.getElementById('spotButtonsContainer');
+    spotContainer.innerHTML = spots.map(s => `
+      <button class="spot-btn" id="spotbtn-${s.id}" onclick="selectSpot('${s.id}')">${s.label}</button>
+    `).join('');
+
+    selectSpot(spots[0].id);
+  }
+
+  function selectSpot(spotId) {
+    selectedSpotId = spotId;
+    document.querySelectorAll('.spot-btn').forEach(b => b.classList.remove('active'));
+    const spBtn = document.getElementById(`spotbtn-${spotId}`);
+    if (spBtn) spBtn.classList.add('active');
+    dealNextHand();
+  }
+
+  function resolveScenarioFromSpot(spotId) {
+    const pick = arr => SCENARIOS[arr[Math.floor(Math.random() * arr.length)]];
+    if (spotId === 'mix_25_utg') {
+      const utgKeys = Object.keys(SCENARIOS).filter(k => SCENARIOS[k].group === 'UTG');
+      return pick(utgKeys);
+    }
+    if (spotId === 'mix_25_hj') {
+      const hjKeys = Object.keys(SCENARIOS).filter(k => SCENARIOS[k].group === 'HJ');
+      return pick(hjKeys);
+    }
+    if (spotId === 'mix_25_bn') {
+      const bnKeys = Object.keys(SCENARIOS).filter(k => SCENARIOS[k].group === 'BN');
+      return pick(bnKeys);
+    }
+    if (spotId === 'mix_25_sb') {
+      const sbKeys = Object.keys(SCENARIOS).filter(k => SCENARIOS[k].group === 'SB');
+      return pick(sbKeys);
+    }
+    if (spotId === 'mix_25_bb') {
+      const bbKeys = Object.keys(SCENARIOS).filter(k => SCENARIOS[k].group === 'BB');
+      return pick(bbKeys);
+    }
+    if (spotId === 'mix_25_all') {
+      return pick(Object.keys(SCENARIOS));
+    }
+    return SCENARIOS[spotId];
+  }
+
+  function getHandBreakdown(scenario, hand) {
+    const entry = scenario.raw[hand];
+    if (!entry) {
+      if (scenario.isConditional) return null;
+      return { allin: 0, raise: 0, call: 0, fold: 100 };
+    }
+    const allin = entry.allin || 0;
+    const raise = entry.raise || 0;
+    const call  = entry.call  || 0;
+    const used = allin + raise + call;
+    const fold = entry.fold !== undefined ? entry.fold : Math.max(0, 100 - used);
+    return { allin, raise, call, fold };
+  }
+
+  function buildScenarioUI(scenario) {
+    document.getElementById('badgePos').textContent = scenario.pos;
+    document.getElementById('badgeStack').textContent = `${scenario.stack} BB`;
+    document.getElementById('badgeSpot').textContent = scenario.spot;
+    document.getElementById('feltBanner').textContent = scenario.banner;
+    document.getElementById('chartTitle').textContent = scenario.title;
+
+    const legEl = document.getElementById('chartLegend');
+    legEl.innerHTML = scenario.legend.map(item => `
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:${item.color};"></div>
+        <span>${item.label}</span>
+      </div>
+    `).join('');
+
+    const btnContainer = document.getElementById('actionButtonsContainer');
+    btnContainer.innerHTML = scenario.actions.map(act => `
+      <button class="act-btn ${act.cls}" id="actbtn-${act.code}" onclick="submitAction('${act.code}')">
+        <span class="act-title">${act.label}</span>
+        <span class="act-sub">${act.sub}</span>
+      </button>
+    `).join('');
+
+    if (lastRenderedScenarioId === scenario.id) {
+      document.querySelectorAll('.matrix-cell.active-hand').forEach(el => el.classList.remove('active-hand'));
+      return;
+    }
+    lastRenderedScenarioId = scenario.id;
+
+    const grid = document.getElementById('matrixGrid');
+    grid.innerHTML = '';
+
+    ALL_169_HANDS.forEach(hand => {
+      const cell = document.createElement('div');
+      cell.id = `cell-${hand}`;
+      const dist = getHandBreakdown(scenario, hand);
+
+      if (!dist) {
+        cell.className = 'matrix-cell unused-cell';
+        cell.innerHTML = `<span>${hand}</span>`;
+      } else {
+        cell.className = 'matrix-cell';
+        const bars = document.createElement('div');
+        bars.className = 'cell-bars';
+
+        if (dist.allin > 0) {
+          const b = document.createElement('div');
+          b.className = 'bar-allin';
+          b.style.width = `${dist.allin}%`;
+          bars.appendChild(b);
+        }
+        if (dist.raise > 0) {
+          const b = document.createElement('div');
+          b.className = 'bar-raise';
+          b.style.width = `${dist.raise}%`;
+          bars.appendChild(b);
+        }
+        if (dist.call > 0) {
+          const b = document.createElement('div');
+          b.className = 'bar-call';
+          b.style.width = `${dist.call}%`;
+          bars.appendChild(b);
+        }
+        if (dist.fold > 0) {
+          const b = document.createElement('div');
+          b.className = 'bar-fold';
+          b.style.width = `${dist.fold}%`;
+          bars.appendChild(b);
+        }
+
+        cell.appendChild(bars);
+        const label = document.createElement('span');
+        label.textContent = hand;
+        cell.appendChild(label);
+      }
+
+      grid.appendChild(cell);
+    });
+  }
+
+  function pickHandNotation(scenario) {
+    const mode = document.getElementById('drillMode').value;
+    const eligibleHands = scenario.isConditional
+      ? Object.keys(scenario.raw)
+      : ALL_169_HANDS;
+
+    if (mode === 'borderline') {
+      return scenario.borderline[Math.floor(Math.random() * scenario.borderline.length)];
+    } else if (mode === 'smart') {
+      if (Math.random() < 0.65) {
+        return scenario.borderline[Math.floor(Math.random() * scenario.borderline.length)];
+      }
+    }
+    return eligibleHands[Math.floor(Math.random() * eligibleHands.length)];
+  }
+
+  function renderPlayingCard(elId, rank, suitObj) {
+    const card = document.getElementById(elId);
+    card.className = `playing-card ${suitObj.cls}`;
+    card.innerHTML = `
+      <div class="corner-rank">${rank}</div>
+      <div class="center-suit">${suitObj.symbol}</div>
+      <div class="bottom-rank">${rank}</div>
+    `;
+  }
+
+  function dealNextHand() {
+    answered = false;
+    isHoldingPeek = false;
+    maskWasCoveredBeforeHold = true;
+    activeScenario = resolveScenarioFromSpot(selectedSpotId);
+
+    buildScenarioUI(activeScenario);
+    document.getElementById('matrixMask').classList.remove('hidden');
+
+    const notation = pickHandNotation(activeScenario);
+    currentHand = notation;
+
+    const r1 = notation[0];
+    const r2 = notation[1];
+    const idx1 = Math.floor(Math.random() * 4);
+    const idx2 = (idx1 + 1 + Math.floor(Math.random() * 3)) % 4;
+    const s1 = SUITS[idx1];
+    const s2 = (notation.length === 3 && notation[2] === 's') ? s1 : SUITS[idx2];
+
+    renderPlayingCard('card1', r1, s1);
+    renderPlayingCard('card2', r2, s2);
+    document.getElementById('handNotation').textContent = notation;
+
+    const fbBox = document.getElementById('feedbackBox');
+    fbBox.className = 'feedback-box';
+    const fbIcon = document.getElementById('feedbackIcon');
+    fbIcon.className = 'feedback-icon icon-neutral';
+    fbIcon.textContent = '?';
+    document.getElementById('feedbackTitle').textContent = `${activeScenario.pos} (25bb • ${activeScenario.spot})`;
+    document.getElementById('feedbackDesc').textContent = 'Select your action below.';
+    document.getElementById('nextBtn').style.display = 'none';
+  }
+
+  function formatBreakdownText(dist) {
+    const parts = [];
+    let callLabel = 'Call';
+    let raiseLabel = 'Raise/3B/4B';
+
+    if (activeScenario.id === 'sb_25_pfi') callLabel = 'Limp';
+    else if (activeScenario.id === 'bb_25_vs_sb_limp') callLabel = 'Check';
+    else if (['hj_25_vs_3bet', 'sb_25_limp_vs_allin', 'sb_25_open_vs_allin'].includes(activeScenario.id)) {
+      callLabel = 'Call All-in';
+    }
+
+    if (activeScenario.id === 'sb_25_limp_vs_iso') {
+      raiseLabel = 'Raise All-in';
+    }
+
+    if (dist.allin > 0) parts.push(`All-in: ${dist.allin}%`);
+    if (dist.raise > 0) parts.push(`${raiseLabel}: ${dist.raise}%`);
+    if (dist.call > 0)  parts.push(`${callLabel}: ${dist.call}%`);
+    if (dist.fold > 0)  parts.push(`Fold: ${dist.fold}%`);
+    return parts.join(' • ');
+  }
+
+  function submitAction(actionCode) {
+    if (answered) return;
+    answered = true;
+    maskWasCoveredBeforeHold = false;
+
+    const dist = getHandBreakdown(activeScenario, currentHand);
+    const chosenFreq = dist[actionCode] || 0;
+    const isCorrect = chosenFreq > 0;
+
+    // Android haptic feedback
+    try {
+      if (navigator.vibrate) {
+        navigator.vibrate(isCorrect ? 25 : [50, 40, 50]);
+      }
+    } catch (e) {}
+
+    stats.total++;
+    if (isCorrect) {
+      stats.correct++;
+      stats.streak++;
+    } else {
+      stats.streak = 0;
+    }
+    saveStats();
+
+    const fbBox = document.getElementById('feedbackBox');
+    const fbIcon = document.getElementById('feedbackIcon');
+    const fbTitle = document.getElementById('feedbackTitle');
+    const fbDesc = document.getElementById('feedbackDesc');
+
+    const breakdownStr = formatBreakdownText(dist);
+
+    if (isCorrect) {
+      fbBox.className = 'feedback-box correct';
+      fbIcon.className = 'feedback-icon icon-correct';
+      fbIcon.textContent = '✓';
+      fbTitle.textContent = chosenFreq === 100
+        ? `CORRECT! Pure 100% (${currentHand})`
+        : `CORRECT! Mixed (${chosenFreq}%) — ${currentHand}`;
+    } else {
+      fbBox.className = 'feedback-box wrong';
+      fbIcon.className = 'feedback-icon icon-wrong';
+      fbIcon.textContent = '✗';
+      fbTitle.textContent = `INCORRECT! (${currentHand})`;
+    }
+
+    fbDesc.textContent = `${currentHand}: [ ${breakdownStr} ]`;
+    document.getElementById('nextBtn').style.display = 'block';
+
+    document.getElementById('matrixMask').classList.add('hidden');
+    const activeCell = document.getElementById(`cell-${currentHand}`);
+    if (activeCell) activeCell.classList.add('active-hand');
+
+    document.querySelectorAll('.act-btn').forEach(b => b.disabled = true);
+  }
+
+  // Click button to toggle permanently until next state change
+  function togglePeek() {
+    const mask = document.getElementById('matrixMask');
+    mask.classList.toggle('hidden');
+    maskWasCoveredBeforeHold = !mask.classList.contains('hidden');
+  }
+
+  function startHoldPeek() {
+    if (!isHoldingPeek) {
+      isHoldingPeek = true;
+      const mask = document.getElementById('matrixMask');
+      maskWasCoveredBeforeHold = !mask.classList.contains('hidden');
+      mask.classList.add('hidden');
+    }
+  }
+
+  function endHoldPeek() {
+    if (isHoldingPeek) {
+      isHoldingPeek = false;
+      const mask = document.getElementById('matrixMask');
+      if (maskWasCoveredBeforeHold) {
+        mask.classList.remove('hidden');
+      }
+    }
+  }
+
+  // Touch & Mouse Hold-to-Peek on the Matrix Wrapper (Mobile & Desktop friendly)
+  const matrixWrapper = document.getElementById('matrixWrapper');
+  matrixWrapper.addEventListener('touchstart', (e) => {
+    if (!answered) {
+      e.preventDefault();
+      startHoldPeek();
+    }
+  }, { passive: false });
+  matrixWrapper.addEventListener('touchend', endHoldPeek);
+  matrixWrapper.addEventListener('touchcancel', endHoldPeek);
+  matrixWrapper.addEventListener('mousedown', () => { if (!answered) startHoldPeek(); });
+  window.addEventListener('mouseup', endHoldPeek);
+
+  function loadStats() {
+    try {
+      const saved = localStorage.getItem('nlh_gto_25bb_only_stats');
+      if (saved) stats = JSON.parse(saved);
+    } catch (e) {}
+    updateStatsUI();
+  }
+
+  function saveStats() {
+    try {
+      localStorage.setItem('nlh_gto_25bb_only_stats', JSON.stringify(stats));
+    } catch (e) {}
+    updateStatsUI();
+  }
+
+  function resetStats() {
+    stats = { correct: 0, total: 0, streak: 0 };
+    saveStats();
+  }
+
+  function updateStatsUI() {
+    document.getElementById('scoreText').textContent = `${stats.correct}/${stats.total}`;
+    const acc = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+    document.getElementById('accText').textContent = `${acc}%`;
+    document.getElementById('streakText').textContent = stats.streak;
+  }
+
+  // Hold-to-Peek on [`] (Backquote) + Action Shortcuts
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Backquote' || e.key === '`') {
+      e.preventDefault();
+      startHoldPeek();
+      return;
+    }
+
+    const key = e.key.toLowerCase();
+    if (!answered) {
+      const acts = activeScenario.actions;
+      if (key === '1' && acts[0]) submitAction(acts[0].code);
+      else if (key === '2' && acts[1]) submitAction(acts[1].code);
+      else if (key === '3' && acts[2]) submitAction(acts[2].code);
+      else if (key === '4' && acts[3]) submitAction(acts[3].code);
+      else if (key === 'f' && acts.some(a => a.code === 'fold')) submitAction('fold');
+      else if (key === 'c' && acts.some(a => a.code === 'call')) submitAction('call');
+      else if (key === 'r' && acts.some(a => a.code === 'raise')) submitAction('raise');
+      else if (key === 'a' && acts.some(a => a.code === 'allin')) submitAction('allin');
+    } else {
+      if (key === ' ' || key === 'enter') {
+        e.preventDefault();
+        dealNextHand();
+      }
+    }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'Backquote' || e.key === '`') {
+      e.preventDefault();
+      endHoldPeek();
+    }
+  });
+
+  loadStats();
+  initNavigation();
+</script>
+</body>
+</html>
