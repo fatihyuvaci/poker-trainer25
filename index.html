@@ -133,7 +133,7 @@
     cursor: pointer;
   }
 
-  /* NAVIGATION BAR (DESKTOP INLINE / MOBILE 2-ROW) */
+  /* NAVIGATION BAR (NO HORIZONTAL SCROLL ON MOBILE) */
   .command-bar {
     display: flex;
     align-items: center;
@@ -206,6 +206,7 @@
     cursor: pointer;
     transition: all 0.12s;
     white-space: nowrap;
+    text-align: center;
   }
 
   .spot-btn.active {
@@ -214,7 +215,7 @@
     border-color: var(--accent-gold);
   }
 
-  /* MOBILE NAVIGATION ADAPTATION */
+  /* MOBILE NAVIGATION: FIT ALL BUTTONS ON SCREEN WITHOUT SCROLLING */
   @media (max-width: 768px) {
     .command-bar {
       flex-direction: column;
@@ -236,16 +237,18 @@
       font-size: 0.72rem;
     }
     .spot-tabs {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding-bottom: 2px;
-      scrollbar-width: none;
-    }
-    .spot-tabs::-webkit-scrollbar {
-      display: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      width: 100%;
     }
     .spot-btn {
-      flex-shrink: 0;
+      flex: 1 1 calc(33.33% - 4px);
+      min-width: 96px;
+      padding: 7px 4px;
+      font-size: 0.69rem;
+      white-space: normal;
+      line-height: 1.15;
     }
   }
 
@@ -315,7 +318,7 @@
     box-shadow: inset 0 0 25px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.35);
     border-radius: 95px;
     flex: 1;
-    min-height: 190px;
+    min-height: 185px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2277,13 +2280,6 @@
     const dist = getHandBreakdown(activeScenario, currentHand);
     const chosenFreq = dist[actionCode] || 0;
     const isCorrect = chosenFreq > 0;
-
-    // Android haptic feedback
-    try {
-      if (navigator.vibrate) {
-        navigator.vibrate(isCorrect ? 25 : [50, 40, 50]);
-      }
-    } catch (e) {}
 
     stats.total++;
     if (isCorrect) {
